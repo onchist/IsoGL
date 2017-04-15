@@ -3,7 +3,6 @@
 
 Entity::Entity(GLuint textureID, Shader* programID, GLuint vaoID, glm::vec3 position) : _programID(programID), _textureID(textureID), _vaoID(vaoID), _position(position)
 {
-	
 }
 
 
