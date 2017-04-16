@@ -46,8 +46,8 @@ private:
 	float _time;
 	Shader* _program;
 	Shader* _lightProgram;
-	GLuint _texture0;
-	GLuint _texture1;
+	GLuint _diffuseMap;
+	GLuint _specularMap;
 	bool inputArray[1024];
 	bool _firstInput[1024];
 	float _lastFrame;
