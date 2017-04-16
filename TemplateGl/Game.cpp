@@ -177,11 +177,37 @@ void Game::draw() {
 	glm::vec3 containerPosition = glm::vec3(0.0f, 0.0f, 0.0f);
 	
 	glm::mat4 containerModel;
-	containerModel = glm::rotate(containerModel, sin(_time / 1000), glm::vec3(1.0f, 0.0f, 0.0f));
+	
 
 	_program->use();
-	GLuint objectColorLoc = glGetUniformLocation(_program->getID(), "objectColor");
-	GLuint lightColorLoc = glGetUniformLocation(_program->getID(), "lightColor");
+	GLint matAmbientLoc = glGetUniformLocation(_program->getID(), "material.ambient");
+	GLint matDiffuseLoc = glGetUniformLocation(_program->getID(), "material.diffuse");
+	GLint matSpecularLoc = glGetUniformLocation(_program->getID(), "material.specular");
+	GLint matShineLoc = glGetUniformLocation(_program->getID(), "material.shininess");
+
+	glUniform3f(matAmbientLoc, 0.0215f, 0.1745f, 0.0215f);
+	glUniform3f(matDiffuseLoc, 0.07568f, 0.61424f, 0.07568f);
+	glUniform3f(matSpecularLoc, 0.633f, 0.727811f, 0.633f);
+	glUniform1f(matShineLoc, 0.6f * 128.0f);
+
+
+	GLuint lightAmbientLoc = glGetUniformLocation(_program->getID(), "light.ambient");
+	GLuint lightDiffuseLoc = glGetUniformLocation(_program->getID(), "light.diffuse");
+	GLuint lightSpecularLoc = glGetUniformLocation(_program->getID(), "light.specular");
+
+	glm::vec3 lightColor;
+	lightColor.x = cos(_time / 1000) / 2 + 0.5f;
+	lightColor.y = sin(_time / 1000) / 2 + 0.5f;
+	lightColor.z = 1.0f;
+
+	glm::vec3 diffuseColor = 0.5f * lightColor;
+	glm::vec3 ambientColor = 0.2f * lightColor;
+	glm::vec3 specularColor = 1.0f * lightColor;
+
+	glUniform3f(lightAmbientLoc, ambientColor.x, ambientColor.y, ambientColor.z);
+	glUniform3f(lightDiffuseLoc, diffuseColor.x, diffuseColor.y, diffuseColor.z);
+	glUniform3f(lightSpecularLoc, specularColor.x, specularColor.y, specularColor.z);
+
 	GLuint lightPosLoc = glGetUniformLocation(_program->getID(), "lightPos");
 	GLuint viewPosLoc = glGetUniformLocation(_program->getID(), "viewPos");
 
@@ -191,8 +217,6 @@ void Game::draw() {
 	GLuint projLoc = glGetUniformLocation(_program->getID(), "projection");
 
 
-	glUniform3f(objectColorLoc, 1.0f, 0.5f, 0.31f);
-	glUniform3f(lightColorLoc, 1.0f, 1.0f, 1.0f);
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(containerModel));
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
@@ -213,7 +237,7 @@ void Game::draw() {
 	GLuint lightModelLoc = glGetUniformLocation(_lightProgram->getID(), "model");
 	GLuint lightViewLoc = glGetUniformLocation(_lightProgram->getID(), "view");
 	GLuint lightProjLoc = glGetUniformLocation(_lightProgram->getID(), "projection");
-	glUniform3f(LightColorLoc, 1.0f, 1.0f, 1.0f);
+	glUniform3f(LightColorLoc, lightColor.x, lightColor.y, lightColor.z);
 	glUniformMatrix4fv(lightModelLoc, 1, GL_FALSE,glm::value_ptr(lightModel));
 	glUniformMatrix4fv(lightViewLoc, 1, GL_FALSE,glm::value_ptr(view));
 	glUniformMatrix4fv(lightProjLoc, 1, GL_FALSE,glm::value_ptr(projection));
@@ -273,7 +297,7 @@ void Game::update() {
 		_isoCamera.rotate(_deltaTime * -1.0f);
 	}
 	
-	_isoCamera.setTarget(_board[_ptrCoord[0]][_ptrCoord[1]]->getPos());
+	//_isoCamera.setTarget(_board[_ptrCoord[0]][_ptrCoord[1]]->getPos());
 	_isoCamera.setTarget(glm::vec3(_ptrCoord[0], _ptrCoord[1], 0.0f));
 }
 
