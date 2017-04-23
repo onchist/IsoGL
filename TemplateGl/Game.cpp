@@ -206,15 +206,22 @@ void Game::draw() {
 	GLint matSpecularLoc = glGetUniformLocation(_program->getID(), "material.specular");
 	GLint matShineLoc = glGetUniformLocation(_program->getID(), "material.shininess");
 
-	glUniform3f(matAmbientLoc, 0.0215f, 0.1745f, 0.0215f);
-	glUniform3f(matDiffuseLoc, 0.07568f, 0.61424f, 0.07568f);
-	glUniform3f(matSpecularLoc, 0.633f, 0.727811f, 0.633f);
+
 	glUniform1f(matShineLoc, 0.6f * 128.0f);
+	
+	GLuint lightPositionLoc = glGetUniformLocation(_program->getID(), "pointLights[0].position");
 
+	GLuint lightAmbientLoc = glGetUniformLocation(_program->getID(), "pointLights[0].ambient");
+	GLuint lightDiffuseLoc = glGetUniformLocation(_program->getID(), "pointLights[0].diffuse");
+	GLuint lightSpecularLoc = glGetUniformLocation(_program->getID(), "pointLights[0].specular");
 
-	GLuint lightAmbientLoc = glGetUniformLocation(_program->getID(), "light.ambient");
-	GLuint lightDiffuseLoc = glGetUniformLocation(_program->getID(), "light.diffuse");
-	GLuint lightSpecularLoc = glGetUniformLocation(_program->getID(), "light.specular");
+	GLuint lightConstantLoc = glGetUniformLocation(_program->getID(), "pointLights[0].constant");
+	GLuint lightLinearLoc = glGetUniformLocation(_program->getID(), "pointLights[0].linear");
+	GLuint lightQuadraticLoc = glGetUniformLocation(_program->getID(), "pointLights[0].quadratic");
+
+	glUniform1f(lightConstantLoc, 1.0f);
+	glUniform1f(lightLinearLoc, 0.09f);
+	glUniform1f(lightQuadraticLoc, 0.032f);
 
 	glm::vec3 lightColor;
 	lightColor.x = 1.0f;
@@ -229,6 +236,7 @@ void Game::draw() {
 	glUniform3f(lightDiffuseLoc, diffuseColor.x, diffuseColor.y, diffuseColor.z);
 	glUniform3f(lightSpecularLoc, specularColor.x, specularColor.y, specularColor.z);
 
+	
 	GLuint lightPosLoc = glGetUniformLocation(_program->getID(), "lightPos");
 	GLuint viewPosLoc = glGetUniformLocation(_program->getID(), "viewPos");
 
@@ -242,6 +250,7 @@ void Game::draw() {
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 	glUniform3f(lightPosLoc, _lampPosition.x, _lampPosition.y, _lampPosition.z);
+	glUniform3f(lightPositionLoc, _lampPosition.x, _lampPosition.y, _lampPosition.z);
 	
 
 	glBindVertexArray(_vaoCube);
