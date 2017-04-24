@@ -52,9 +52,6 @@ private:
 	bool _firstInput[1024];
 	float _lastFrame;
 	float _deltaTime;
-	float _slider0;
-	float _slider1;
-	float _slider2;
 	isoCamera _isoCamera;
 	Entity*** _board;
 	Entity*** _entities;

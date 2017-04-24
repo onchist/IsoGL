@@ -10,8 +10,6 @@ Game::Game() {
 	_gameState = GameState::PLAY;
 	_deltaTime = 0.0f;
 	_lastFrame = 0.0f;
-	_slider0 = 0.0f;
-	_slider1 = 0.0f;
 	_isoCamera = isoCamera();
 	_ptrCoord = new int[2]{ 0,0 };
 	_lampPosition = glm::vec3(1.2f, 1.0f, 2.0f);
@@ -163,15 +161,6 @@ void Game::gameLoop() {
 }
 
 void Game::draw() {
-
-	
-
-	GLfloat cameraSpeed = 0.05f;
-
-	
-
-
-	
 	glClearDepth(1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
@@ -181,10 +170,6 @@ void Game::draw() {
 	glm::mat4 projection;
 	projection = glm::perspective(glm::radians(45.0f), (float)_screenWidth / (float)_screenHeight, 0.1f, 100.0f);
 
-	
-	
-
-	
 	glm::vec3 containerPosition = glm::vec3(0.0f, 0.0f, 0.0f);
 	
 	glm::mat4 containerModel;
@@ -209,6 +194,7 @@ void Game::draw() {
 
 	glUniform1f(matShineLoc, 0.6f * 128.0f);
 	
+
 	GLuint lightPositionLoc = glGetUniformLocation(_program->getID(), "pointLights[0].position");
 
 	GLuint lightAmbientLoc = glGetUniformLocation(_program->getID(), "pointLights[0].ambient");
