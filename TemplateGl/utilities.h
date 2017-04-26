@@ -6,9 +6,13 @@
 #include <GL/glew.h>
 #include <vector>
 #include <SDL/SDL.h>
+#include <SOIL/SOIL.h>
 
 #ifndef UTILITIES
 #define UTILITIES
-std::string utilReadFile(const std::string pathToFile);
-void PrintError(std::string errorMessage);
+namespace utilities {
+	std::string utilReadFile(const std::string pathToFile);
+	void PrintError(std::string errorMessage);
+	GLint TextureFromFile(const char* path, std::string directory);
+}
 #endif

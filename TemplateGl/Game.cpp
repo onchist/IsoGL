@@ -13,6 +13,7 @@ Game::Game() {
 	_isoCamera = isoCamera();
 	_ptrCoord = new int[2]{ 0,0 };
 	_lampPosition = glm::vec3(1.2f, 1.0f, 2.0f);
+	
 }
 
 
@@ -171,12 +172,12 @@ void Game::draw() {
 	projection = glm::perspective(glm::radians(45.0f), (float)_screenWidth / (float)_screenHeight, 0.1f, 100.0f);
 
 	_program->use();
-
 	
 	GLint matShineLoc = glGetUniformLocation(_program->getID(), "material.shininess");
 	glUniform1f(matShineLoc, 0.6f * 128.0f);
 	
 
+	
 	GLuint lightPositionLoc = glGetUniformLocation(_program->getID(), "pointLights[0].position");
 
 	GLuint lightAmbientLoc = glGetUniformLocation(_program->getID(), "pointLights[0].ambient");
@@ -197,12 +198,13 @@ void Game::draw() {
 	lightColor.z = 1.0f;
 
 	glm::vec3 diffuseColor = 0.5f * lightColor;
-	glm::vec3 ambientColor = 0.2f * lightColor;
+	glm::vec3 ambientColor = 0.1f * lightColor;
 	glm::vec3 specularColor = 1.0f * lightColor;
 
 	glUniform3f(lightAmbientLoc, ambientColor.x, ambientColor.y, ambientColor.z);
 	glUniform3f(lightDiffuseLoc, diffuseColor.x, diffuseColor.y, diffuseColor.z);
 	glUniform3f(lightSpecularLoc, specularColor.x, specularColor.y, specularColor.z);
+
 
 	
 	GLuint lightPosLoc = glGetUniformLocation(_program->getID(), "lightPos");
@@ -305,6 +307,7 @@ void Game::update() {
 
 
 void Game::loadBoard() {
+	
 	_boardX = 3;
 	_boardY = 3;
 

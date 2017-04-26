@@ -13,6 +13,7 @@
 #include "isoCamera.h"
 #include "Entity.h"
 #include <vector>
+#include "Model.h"
 
 enum class GameState{PLAY,EXIT};
 
@@ -67,5 +68,6 @@ private:
 	bool _keyPressed;
 	int* _ptrCoord;
 	glm::vec3 _lampPosition;
+	Model* ourModel;
 };
 

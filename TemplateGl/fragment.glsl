@@ -64,9 +64,10 @@ void main()
 }
 
 vec3 calcDirLight(DirLight light, vec3 normal, mat4 view){
-	vec3 lightDir = normalize(-vec3(view * vec4(light.direction, 1.0)));
-
-	float diff = max(dot(normal, lightDir), 0.0);
+	vec3 lightDir = -vec3(view * vec4(light.direction, 1.0));
+	lightDir = normalize(lightDir);
+	vec3 norm = normalize(normal);
+	float diff = max(dot(norm, lightDir), 0.0);
     // Specular shading
     vec3 reflectDir = reflect(-lightDir, normal);
     float spec = pow(max(dot(vec3(0.0), reflectDir), 0.0), material.shininess);

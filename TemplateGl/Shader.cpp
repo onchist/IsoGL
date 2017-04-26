@@ -74,7 +74,7 @@ GLuint Shader::createProgram(const int N, GLuint* shaderIDs) {
 	GLint success = 0;
 	glGetProgramiv(programID, GL_LINK_STATUS, &success);
 	if (!success) {
-		PrintError("Error while linking a shader program.");
+		utilities::PrintError("Error while linking a shader program.");
 		return 0;
 	}
 	return programID;
