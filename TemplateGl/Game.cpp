@@ -8,8 +8,8 @@ Game::Game() {
 	_screenWidth = 1024;
 	_screenHeight = 576;
 	_gameState = GameState::PLAY;
-	_deltaTime = 0.0f;
-	_lastFrame = 0.0f;
+	_deltaTime = 0;
+	_lastFrame = 0;
 	_isoCamera = isoCamera();
 	_ptrCoord = new int[2]{ 0,0 };
 	_lampPosition = glm::vec3(1.2f, 1.0f, 2.0f);
@@ -170,28 +170,10 @@ void Game::draw() {
 	glm::mat4 projection;
 	projection = glm::perspective(glm::radians(45.0f), (float)_screenWidth / (float)_screenHeight, 0.1f, 100.0f);
 
-	glm::vec3 containerPosition = glm::vec3(0.0f, 0.0f, 0.0f);
-	
-	glm::mat4 containerModel;
-	
-
 	_program->use();
 
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, _diffuseMap);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, _specularMap);
-
-	glUniform1i(glGetUniformLocation(_program->getID(), "material.diffuse"), 0);
-	glUniform1i(glGetUniformLocation(_program->getID(), "material.specular"), 1);
-
-
-	GLint matAmbientLoc = glGetUniformLocation(_program->getID(), "material.ambient");
-	GLint matDiffuseLoc = glGetUniformLocation(_program->getID(), "material.diffuse");
-	GLint matSpecularLoc = glGetUniformLocation(_program->getID(), "material.specular");
+	
 	GLint matShineLoc = glGetUniformLocation(_program->getID(), "material.shininess");
-
-
 	glUniform1f(matShineLoc, 0.6f * 128.0f);
 	
 
@@ -232,15 +214,13 @@ void Game::draw() {
 	GLuint projLoc = glGetUniformLocation(_program->getID(), "projection");
 
 
-	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(containerModel));
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 	glUniform3f(lightPosLoc, _lampPosition.x, _lampPosition.y, _lampPosition.z);
 	glUniform3f(lightPositionLoc, _lampPosition.x, _lampPosition.y, _lampPosition.z);
 	
 
-	glBindVertexArray(_vaoCube);
-	glDrawArrays(GL_TRIANGLES,0, 36);
+	
 
 
 	
@@ -262,6 +242,12 @@ void Game::draw() {
 	glBindVertexArray(_vaoLight);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 
+	for (int i = 0; i < _boardX; i++) {
+		for (int o = 0; o < _boardY; o++) {
+			_board[i][o]->draw(view, projection);
+		}
+	}
+
 	SDL_GL_SwapWindow(_window);
 }
 
@@ -272,7 +258,7 @@ void Game::update() {
 	if (inputArray[SDLK_ESCAPE]) {
 		_gameState = GameState::EXIT;
 	}
-	_lampPosition.x = sin(_time / 1000);
+	_lampPosition.x = sin(_time/1000);
 	if (inputArray[SDLK_z]) {
 		//_isoCamera.move(glm::vec3(0.0f, _deltaTime * 3.0f , 0.0f));
 		if (!_firstInput[SDLK_z]) { 
@@ -321,29 +307,26 @@ void Game::update() {
 void Game::loadBoard() {
 	_boardX = 3;
 	_boardY = 3;
-	/*float unit = 1.2f;
+
+	float unit = 1.2f;
 	_board = new Entity**[_boardX];
-	_entities = new Entity**[_boardX];
 
 	for (int i = 0; i < _boardX; i++) {
 		_board[i] = new Entity*[_boardY];
-		_entities[i] = new Entity*[_boardY];
 	}
 
-	_board[0][0] = new Entity(_texture0, _program, _vaoCube, glm::vec3(0.0f, 0.0f, 0.0f));
-	_board[1][0] = new Entity(_texture0, _program, _vaoCube, glm::vec3(unit, 0.0f, 0.0f));
-	_board[2][0] = new Entity(_texture0, _program, _vaoCube, glm::vec3(2 * unit, 0.0f, 0.0f));
+	_board[0][0] = new Entity(_program, _diffuseMap, _specularMap, _vaoCube, glm::vec3(0.0f, 0.0f, 0.0f));
+	_board[1][0] = new Entity(_program, _diffuseMap, _specularMap, _vaoCube, glm::vec3(unit, 0.0f, 0.0f));
+	_board[2][0] = new Entity(_program, _diffuseMap, _specularMap, _vaoCube, glm::vec3(2 * unit, 0.0f, 0.0f));
 
-	_board[0][1] = new Entity(_texture0, _program, _vaoCube, glm::vec3(0.0f, unit, 0.0f));
-	_board[1][1] = new Entity(_texture0, _program, _vaoCube, glm::vec3(unit, unit, 0.0f));
-	_board[2][1] = new Entity(_texture0, _program, _vaoCube, glm::vec3(2 * unit, unit, 0.0f));
+	_board[0][1] = new Entity(_program, _diffuseMap, _specularMap, _vaoCube, glm::vec3(0.0f, unit, 0.0f));
+	_board[1][1] = new Entity(_program, _diffuseMap, _specularMap, _vaoCube, glm::vec3(unit, unit, 0.0f));
+	_board[2][1] = new Entity(_program, _diffuseMap, _specularMap, _vaoCube, glm::vec3(2 * unit, unit, 0.0f));
 
-	_board[0][2] = new Entity(_texture0, _program, _vaoCube, glm::vec3(0.0f, 2 * unit, 0.0f));
-	_board[1][2] = new Entity(_texture0, _program, _vaoCube, glm::vec3(unit, 2 * unit, 0.0f));
-	_board[2][2] = new Entity(_texture0, _program, _vaoCube, glm::vec3(2 * unit, 2 * unit, 0.0f));
-
-	_entities[0][0] = new Entity(_texture0, _program, _vaoSprite, glm::vec3(0.0f, 0.0f, 0.0f));
-	*/
+	_board[0][2] = new Entity(_program, _diffuseMap, _specularMap, _vaoCube, glm::vec3(0.0f, 2 * unit, 0.0f));
+	_board[1][2] = new Entity(_program, _diffuseMap, _specularMap, _vaoCube, glm::vec3(unit, 2 * unit, 0.0f));
+	_board[2][2] = new Entity(_program, _diffuseMap, _specularMap, _vaoCube, glm::vec3(2 * unit, 2 * unit, 0.0f));
+	
 }
 
 void Game::genVaos() {

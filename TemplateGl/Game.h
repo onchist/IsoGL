@@ -29,29 +29,36 @@ public:
 private:
 	void draw();
 	void update();
+
 	void loadBoard();
 	void initSystems();
 	void freeSystems();
 	void gameLoop();
 	void pollEvents();
 	void genVaos();
+
 	SDL_Window* _window;
 	int _screenWidth;
 	int _screenHeight;
+
 	GameState _gameState;
 	SDL_GLContext _glContext;
 	GLuint _vaoCube;
 	GLuint _vaoSprite;
 	GLuint _vaoLight;
+
 	float _time;
+	float _lastFrame;
+	float _deltaTime;
+
 	Shader* _program;
 	Shader* _lightProgram;
+
 	GLuint _diffuseMap;
 	GLuint _specularMap;
 	bool inputArray[1024];
 	bool _firstInput[1024];
-	float _lastFrame;
-	float _deltaTime;
+	
 	isoCamera _isoCamera;
 	Entity*** _board;
 	Entity*** _entities;

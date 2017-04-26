@@ -9,7 +9,7 @@
 class Entity
 {
 public:
-	Entity(GLuint textureID, Shader* programID,GLuint vaoID, glm::vec3 position);
+	Entity(Shader* programID, GLuint diffuseMap, GLuint specularMap, GLuint vaoID, glm::vec3 position);
 	~Entity();
 
 	void draw(glm::mat4 view, glm::mat4 projection);
@@ -18,7 +18,8 @@ public:
 	glm::vec3 getPos();
 private:
 	Shader* _programID;
-	GLuint _textureID;
+	GLuint _diffuseMap;
+	GLuint _specularMap;
 	glm::vec3 _position;
 	GLuint _vaoID;
 };

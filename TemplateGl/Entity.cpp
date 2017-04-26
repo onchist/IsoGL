@@ -1,9 +1,15 @@
 #include "Entity.h"
 
 
-Entity::Entity(GLuint textureID, Shader* programID, GLuint vaoID, glm::vec3 position) : _programID(programID), _textureID(textureID), _vaoID(vaoID), _position(position)
-{
+
+Entity::Entity(Shader* programID, GLuint diffuseMap, GLuint specularMap, GLuint vaoID, glm::vec3 position) {
+	_programID = programID;
+	_diffuseMap = diffuseMap;
+	_specularMap = specularMap;
+	_vaoID = vaoID;
+	_position = position;
 }
+
 
 
 Entity::~Entity()
@@ -13,13 +19,16 @@ Entity::~Entity()
 void Entity::draw(glm::mat4 view, glm::mat4 projection)
 {
 	glUniformMatrix4fv(glGetUniformLocation(_programID->getID(), "view"), 1, GL_FALSE, glm::value_ptr(view));
-
-
 	glUniformMatrix4fv(glGetUniformLocation(_programID->getID(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, _textureID);
-	glUniform1i(glGetUniformLocation(_programID->getID(), "myTexture0"), 0);
+	glBindTexture(GL_TEXTURE_2D, _diffuseMap);
+	glUniform1i(glGetUniformLocation(_programID->getID(), "material.diffuse"), 0);
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, _specularMap);
+	glUniform1i(glGetUniformLocation(_programID->getID(), "material.specular"), 1);
+
 
 	_programID->use();
 	glBindVertexArray(_vaoID);
