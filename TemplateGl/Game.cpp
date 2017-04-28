@@ -87,33 +87,9 @@ void Game::initSystems() {
 	_lightProgram = new Shader(nL, typesL, pathsL, nFilesL);
 
 
+	_diffuseMap = utilities::TextureFromFile("textures/diffuse.png");
 
-	int width, height;
-	unsigned char* image = SOIL_load_image("textures/diffuse.png", &width, &height, 0, SOIL_LOAD_RGB);
-
-	
-	glGenTextures(1, &_diffuseMap);
-	glBindTexture(GL_TEXTURE_2D, _diffuseMap);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	SOIL_free_image_data(image);
-
-	image = SOIL_load_image("textures/specular.png", &width, &height, 0, SOIL_LOAD_RGB);
-
-	glGenTextures(1, &_specularMap);
-	glBindTexture(GL_TEXTURE_2D, _specularMap);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	SOIL_free_image_data(image);
-	
+	_specularMap = utilities::TextureFromFile("textures/specular.png");
 
 	loadBoard();
 }
@@ -243,12 +219,35 @@ void Game::draw() {
 	
 	glBindVertexArray(_vaoLight);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glBindVertexArray(0);
 
-	for (int i = 0; i < _boardX; i++) {
+	/*for (int i = 0; i < _boardX; i++) {
 		for (int o = 0; o < _boardY; o++) {
 			_board[i][o]->draw(view, projection);
 		}
-	}
+	}*/
+
+	_program->use();
+
+	/*glm::mat4 matrox;
+	matrox = glm::translate(matrox, glm::vec3(0.0f, -1.5f, 0.0f));
+	matrox = glm::scale(matrox, glm::vec3(1.0f));
+
+	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(matrox));
+	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+
+	testMesh->draw(_program);*/
+
+	glm::mat4 matrix;
+	matrix = glm::translate(matrix, glm::vec3(0.0f, -1.5f, 0.0f));
+	matrix = glm::scale(matrix, glm::vec3(0.2f));
+
+	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(matrix));
+	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+
+	ourModel->draw(_program);
 
 	SDL_GL_SwapWindow(_window);
 }
@@ -329,7 +328,44 @@ void Game::loadBoard() {
 	_board[0][2] = new Entity(_program, _diffuseMap, _specularMap, _vaoCube, glm::vec3(0.0f, 2 * unit, 0.0f));
 	_board[1][2] = new Entity(_program, _diffuseMap, _specularMap, _vaoCube, glm::vec3(unit, 2 * unit, 0.0f));
 	_board[2][2] = new Entity(_program, _diffuseMap, _specularMap, _vaoCube, glm::vec3(2 * unit, 2 * unit, 0.0f));
-	
+
+	Texture diffuseTest;
+	diffuseTest.id = _diffuseMap;
+	diffuseTest.path = "suchkek";
+	diffuseTest.type = "texture_diffuse";
+	std::vector<Texture> textTest;
+	textTest.push_back(diffuseTest);
+
+	std::vector<Vertex> verticesTest;
+
+	Vertex vertex0;
+	vertex0.position = glm::vec3(0.0f, 0.0f, 0.0f);
+	vertex0.normal = glm::vec3(0.0f, 1.0f, 0.0f);
+	vertex0.texCoords = glm::vec2(0.0f, 0.0f);
+	verticesTest.push_back(vertex0);
+
+	Vertex vertex1;
+	vertex1.position = glm::vec3(1.0f, 0.0f, 0.0f);
+	vertex1.normal = glm::vec3(0.0f, 1.0f, 0.0f);
+	vertex1.texCoords = glm::vec2(1.0f, 0.0f);
+	verticesTest.push_back(vertex1);
+
+	Vertex vertex2;
+	vertex2.position = glm::vec3(0.0f, 1.0f, 0.0f);
+	vertex2.normal = glm::vec3(0.0f, 1.0f, 0.0f);
+	vertex2.texCoords = glm::vec2(0.0f, 1.0f);
+	verticesTest.push_back(vertex2);
+
+	Vertex vertex3;
+	vertex3.position = glm::vec3(1.0f, 1.0f, 0.0f);
+	vertex3.normal = glm::vec3(0.0f, 1.0f, 0.0f);
+	vertex3.texCoords = glm::vec2(1.0f, 1.0f);
+	verticesTest.push_back(vertex3);
+
+	std::vector<GLuint> indicesTest = { 0, 1, 2, 1, 2 ,3};
+
+	testMesh = new Mesh(verticesTest, indicesTest, textTest);
+	ourModel = new Model("nanosuit.obj");
 }
 
 void Game::genVaos() {
@@ -451,9 +487,10 @@ void Game::genVaos() {
 
 	glBindVertexArray(0);
 
+
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	glGenBuffers(1, &_vaoLight);
+	glGenVertexArrays(1, &_vaoLight);
 	glBindVertexArray(_vaoLight);
 	glBindBuffer(GL_ARRAY_BUFFER, vboID);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);

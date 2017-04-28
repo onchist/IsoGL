@@ -1,6 +1,7 @@
 #version 330 core
 
 struct Material{
+	sampler2D texture_diffuse1;
 	sampler2D diffuse;
 	float shininess;
 	sampler2D specular;
@@ -60,7 +61,9 @@ void main()
 		result += calcPointLight(pointLights[i], Normal, FragPos, viewFrag);
 	}
 
-	color = vec4(result, 1.0f);
+	//color = vec4(result, 1.0f);
+	color = vec4(texture(material.texture_diffuse1, TexCoords));
+	//color = vec4(1.0f);
 }
 
 vec3 calcDirLight(DirLight light, vec3 normal, mat4 view){

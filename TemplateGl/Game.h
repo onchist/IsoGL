@@ -69,5 +69,6 @@ private:
 	int* _ptrCoord;
 	glm::vec3 _lampPosition;
 	Model* ourModel;
+	Mesh* testMesh;
 };
 

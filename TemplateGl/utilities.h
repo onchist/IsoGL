@@ -13,6 +13,7 @@
 namespace utilities {
 	std::string utilReadFile(const std::string pathToFile);
 	void PrintError(std::string errorMessage);
+	GLint TextureFromFile(std::string path);
 	GLint TextureFromFile(const char* path, std::string directory);
 }
 #endif
