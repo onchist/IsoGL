@@ -79,5 +79,8 @@
     <None Include="lightVertex.glsl">
       <Filter>shaders</Filter>
     </None>
+    <None Include="modelFragment.glsl">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -21,7 +21,7 @@ void utilities::PrintError(std::string errorMessage) {
 
 }
 
-GLint utilities::TextureFromFile(std::string path)
+GLuint utilities::TextureFromFile(std::string path)
 {
 	GLuint textureID;
 	glGenTextures(1, &textureID);
@@ -42,7 +42,7 @@ GLint utilities::TextureFromFile(std::string path)
 	return textureID;
 }
 
-GLint utilities::TextureFromFile(const char* path, std::string directory)
+GLuint utilities::TextureFromFile(const char* path, std::string directory)
 {
 	//Generate texture ID and load texture data 
 	std::string filename = std::string(path);
@@ -51,6 +51,9 @@ GLint utilities::TextureFromFile(const char* path, std::string directory)
 	glGenTextures(1, &textureID);
 	int width, height;
 	unsigned char* image = SOIL_load_image(filename.c_str(), &width, &height, 0, SOIL_LOAD_RGB);
+
+	//std::cout << "Attempted to load file : " << directory + '/' + path << "w = " << width << " h = "<< height << std::endl;
+
 	// Assign texture to ID
 	glBindTexture(GL_TEXTURE_2D, textureID);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);

@@ -17,6 +17,7 @@ void Model::loadModel(std::string path) {
 		return;
 	}
 	this->directory = path.substr(0, path.find_last_of('/'));
+	std::cout << "path : " << path << std::endl;
 	std::cout <<  "directory variable : " << directory << std::endl;
 
 	this->processNode(scene->mRootNode, scene);
@@ -55,8 +56,8 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 
 		if (mesh->mTextureCoords[0]) {
 			glm::vec2 vec;
-			vec.x = mesh->mTextureCoords[0]->x;
-			vec.y = mesh->mTextureCoords[0]->y;
+			vec.x = mesh->mTextureCoords[0][i].x;
+			vec.y = mesh->mTextureCoords[0][i].y;
 			vertex.texCoords = vec;
 		}
 		else { vertex.texCoords = glm::vec2(0.0f, 0.0f); }
@@ -85,9 +86,10 @@ std::vector<Texture> Model::loadTextures(aiMaterial * material, aiTextureType ty
 {
 	std::vector<Texture> textures;
 	for (int i = 0; i < material->GetTextureCount(type); i++) {
+		
 		aiString str;
 		material->GetTexture(type, i, &str);
-		
+		std::cout << str.C_Str() << std::endl;
 		GLboolean skip = false;
 		for (GLuint o = 0; o < this->textures_loaded.size(); o++) {
 			if (std::strcmp(str.C_Str(), textures_loaded[o].path.C_Str()) == 0) {
@@ -99,7 +101,8 @@ std::vector<Texture> Model::loadTextures(aiMaterial * material, aiTextureType ty
 		if (!skip) {
 			Texture texture;
 			texture.id = utilities::TextureFromFile(str.C_Str(), this->directory);
-			std::cout << str.C_Str() << '\t' << directory << std::endl;
+			//std::cout << "directory : " << directory << " fileName : " << str.C_Str() << std::endl;
+			
 			texture.type = typeName;
 			texture.path = str;
 			textures.push_back(texture);

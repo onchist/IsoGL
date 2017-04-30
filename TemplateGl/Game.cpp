@@ -86,7 +86,6 @@ void Game::initSystems() {
 
 	_lightProgram = new Shader(nL, typesL, pathsL, nFilesL);
 
-
 	_diffuseMap = utilities::TextureFromFile("textures/diffuse.png");
 
 	_specularMap = utilities::TextureFromFile("textures/specular.png");
@@ -227,9 +226,10 @@ void Game::draw() {
 		}
 	}*/
 
+	
 	_program->use();
 
-	/*glm::mat4 matrox;
+	glm::mat4 matrox;
 	matrox = glm::translate(matrox, glm::vec3(0.0f, -1.5f, 0.0f));
 	matrox = glm::scale(matrox, glm::vec3(1.0f));
 
@@ -237,11 +237,11 @@ void Game::draw() {
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 
-	testMesh->draw(_program);*/
+	testMesh->draw(_program);
 
 	glm::mat4 matrix;
 	matrix = glm::translate(matrix, glm::vec3(0.0f, -1.5f, 0.0f));
-	matrix = glm::scale(matrix, glm::vec3(0.2f));
+	matrix = glm::scale(matrix, glm::vec3(0.5f));
 
 	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(matrix));
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
@@ -330,7 +330,8 @@ void Game::loadBoard() {
 	_board[2][2] = new Entity(_program, _diffuseMap, _specularMap, _vaoCube, glm::vec3(2 * unit, 2 * unit, 0.0f));
 
 	Texture diffuseTest;
-	diffuseTest.id = _diffuseMap;
+	//diffuseTest.id = utilities::TextureFromFile("body_dif.png", "nanosuit.obj");
+	diffuseTest.id = utilities::TextureFromFile("nanosuit/body_dif.png");
 	diffuseTest.path = "suchkek";
 	diffuseTest.type = "texture_diffuse";
 	std::vector<Texture> textTest;
@@ -365,7 +366,8 @@ void Game::loadBoard() {
 	std::vector<GLuint> indicesTest = { 0, 1, 2, 1, 2 ,3};
 
 	testMesh = new Mesh(verticesTest, indicesTest, textTest);
-	ourModel = new Model("nanosuit.obj");
+
+	ourModel = new Model("nanosuit/nanosuit.obj");
 }
 
 void Game::genVaos() {
