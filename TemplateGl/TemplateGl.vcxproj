@@ -140,7 +140,6 @@
     <None Include="fragment.glsl" />
     <None Include="lightFragment.glsl" />
     <None Include="lightVertex.glsl" />
-    <None Include="modelFragment.glsl" />
     <None Include="vertex.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
