@@ -151,38 +151,16 @@ void Game::draw() {
 	glUniform1f(matShineLoc, 0.6f * 128.0f);
 	
 
+	int pointN = 0;
+	int dirN = 0;
+	int spotN = 0;
+
+	for (int i = 0; i < _pointLights.size(); i++) {
+		_pointLights[i].processUniforms(_program, pointN);
+		pointN++;
+	}
 	
-	GLuint lightPositionLoc = glGetUniformLocation(_program->getID(), "pointLights[0].position");
-
-	GLuint lightAmbientLoc = glGetUniformLocation(_program->getID(), "pointLights[0].ambient");
-	GLuint lightDiffuseLoc = glGetUniformLocation(_program->getID(), "pointLights[0].diffuse");
-	GLuint lightSpecularLoc = glGetUniformLocation(_program->getID(), "pointLights[0].specular");
-
-	GLuint lightConstantLoc = glGetUniformLocation(_program->getID(), "pointLights[0].constant");
-	GLuint lightLinearLoc = glGetUniformLocation(_program->getID(), "pointLights[0].linear");
-	GLuint lightQuadraticLoc = glGetUniformLocation(_program->getID(), "pointLights[0].quadratic");
-
-	glUniform1f(lightConstantLoc, 1.0f);
-	glUniform1f(lightLinearLoc, 0.09f);
-	glUniform1f(lightQuadraticLoc, 0.032f);
-
-	glm::vec3 lightColor;
-	lightColor.x = 1.0f;
-	lightColor.y = 1.0f;
-	lightColor.z = 1.0f;
-
-	glm::vec3 diffuseColor = 0.5f * lightColor;
-	glm::vec3 ambientColor = 0.1f * lightColor;
-	glm::vec3 specularColor = 1.0f * lightColor;
-
-	glUniform3f(lightAmbientLoc, ambientColor.x, ambientColor.y, ambientColor.z);
-	glUniform3f(lightDiffuseLoc, diffuseColor.x, diffuseColor.y, diffuseColor.z);
-	glUniform3f(lightSpecularLoc, specularColor.x, specularColor.y, specularColor.z);
-
-
 	
-	GLuint lightPosLoc = glGetUniformLocation(_program->getID(), "lightPos");
-	GLuint viewPosLoc = glGetUniformLocation(_program->getID(), "viewPos");
 
 	
 	GLuint modelLoc = glGetUniformLocation(_program->getID(), "model");
@@ -192,41 +170,9 @@ void Game::draw() {
 
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
-	glUniform3f(lightPosLoc, _lampPosition.x, _lampPosition.y, _lampPosition.z);
-	glUniform3f(lightPositionLoc, _lampPosition.x, _lampPosition.y, _lampPosition.z);
+	
 	
 
-	
-
-
-	
-	glm::mat4 lightModel = glm::mat4();
-	lightModel = glm::translate(lightModel, _lampPosition);
-	lightModel = glm::scale(lightModel, glm::vec3(0.2f));
-
-	_lightProgram->use();
-	GLuint LightColorLoc = glGetUniformLocation(_lightProgram->getID(), "lightColor");
-	GLuint lightModelLoc = glGetUniformLocation(_lightProgram->getID(), "model");
-	GLuint lightViewLoc = glGetUniformLocation(_lightProgram->getID(), "view");
-	GLuint lightProjLoc = glGetUniformLocation(_lightProgram->getID(), "projection");
-	glUniform3f(LightColorLoc, lightColor.x, lightColor.y, lightColor.z);
-	glUniformMatrix4fv(lightModelLoc, 1, GL_FALSE,glm::value_ptr(lightModel));
-	glUniformMatrix4fv(lightViewLoc, 1, GL_FALSE,glm::value_ptr(view));
-	glUniformMatrix4fv(lightProjLoc, 1, GL_FALSE,glm::value_ptr(projection));
-	
-	
-	glBindVertexArray(_vaoLight);
-	glDrawArrays(GL_TRIANGLES, 0, 36);
-	glBindVertexArray(0);
-
-	/*for (int i = 0; i < _boardX; i++) {
-		for (int o = 0; o < _boardY; o++) {
-			_board[i][o]->draw(view, projection);
-		}
-	}*/
-
-	
-	
 
 	_nano->draw(view, projection);
 
@@ -353,8 +299,24 @@ void Game::loadBoard() {
 
 	testMesh = new Mesh(verticesTest, indicesTest, textTest);*/
 
+	glm::vec3 light = glm::vec3(1.0f, 1.0f, 1.0f);
+	LightMaterial material;
+	material.ambient = light * 0.2f;
+	material.diffuse = light * 0.7f;
+	material.specular = light * 1.0f;
+
+	glm::vec3 position = glm::vec3(0.0f, 0.0f, 5.0f);
+
+	float constant = 1.0f;
+	float linear = 0.09f;
+	float quadratic = 0.032f;
+
+	PointLight pointLight(material, position, constant, linear, quadratic);
+
+	_pointLights.push_back(pointLight);
+
 	ourModel = new Model("models/nanosuit/nanosuit.obj");
-	_nano = new Entity(_program, ourModel, glm::vec3(1.0f), glm::vec3(1.0f));
+	_nano = new Entity(_program, ourModel, glm::vec3(1.0f), glm::vec3(0.2f));
 }
 
 void Game::genVaos() {

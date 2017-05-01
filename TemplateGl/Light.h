@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <GL/glew.h>
 #include "Shader.h"
+#include <iostream>
 
 enum LightType {
 	point,
@@ -22,10 +23,11 @@ public:
 	Light();
 	Light(LightMaterial lightMaterial, std::string type);
 	~Light();
-	virtual void processUniforms() = 0;
+	virtual void processUniforms(Shader* program, int n) = 0;
+	std::string getType();
+	std::string _type;
 protected:
 	LightMaterial _lightMaterial;
-	std::string _type;
 };
 
 class PointLight : public Light {

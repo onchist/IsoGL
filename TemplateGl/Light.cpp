@@ -15,6 +15,11 @@ Light::~Light()
 {
 }
 
+std::string Light::getType()
+{
+	return _type;
+}
+
 PointLight::PointLight(LightMaterial lightMaterial, glm::vec3 position, float constant, float linear, float quadratic) : Light(lightMaterial, "pointLights"), 
 _position(position), _constant(constant), _linear(linear), _quadratic(quadratic)
 {
@@ -47,8 +52,8 @@ void PointLight::processUniforms(Shader* program, int n)
 	glUniform3f(lightPositionLoc, _position.x, _position.y, _position.z);
 
 	glUniform3f(lightAmbientLoc, _lightMaterial.ambient.x, _lightMaterial.ambient.y, _lightMaterial.ambient.z);
-	glUniform3f(lightAmbientLoc, _lightMaterial.diffuse.x, _lightMaterial.diffuse.y, _lightMaterial.diffuse.z);
-	glUniform3f(lightAmbientLoc, _lightMaterial.specular.x, _lightMaterial.specular.y, _lightMaterial.specular.z);
+	glUniform3f(lightDiffuseLoc, _lightMaterial.diffuse.x, _lightMaterial.diffuse.y, _lightMaterial.diffuse.z);
+	glUniform3f(lightSpecularLoc, _lightMaterial.specular.x, _lightMaterial.specular.y, _lightMaterial.specular.z);
 
 	glUniform1f(lightConstantLoc, _constant);
 	glUniform1f(lightLinearLoc, _linear);

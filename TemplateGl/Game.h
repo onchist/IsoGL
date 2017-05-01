@@ -30,6 +30,7 @@ public:
 
 private:
 	void draw();
+
 	void update();
 
 	void loadBoard();
@@ -74,6 +75,6 @@ private:
 	float _fps;
 	Entity* _nano;
 
-	Light** _lights;
+	std::vector<PointLight> _pointLights;
 };
 
