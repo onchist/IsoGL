@@ -14,6 +14,7 @@
 #include "Entity.h"
 #include <vector>
 #include "Model.h"
+#include "Light.h"
 
 enum class GameState{PLAY,EXIT};
 
@@ -69,6 +70,10 @@ private:
 	int* _ptrCoord;
 	glm::vec3 _lampPosition;
 	Model* ourModel;
-	Mesh* testMesh;
+
+	float _fps;
+	Entity* _nano;
+
+	Light** _lights;
 };
 

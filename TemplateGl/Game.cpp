@@ -13,7 +13,6 @@ Game::Game() {
 	_isoCamera = isoCamera();
 	_ptrCoord = new int[2]{ 0,0 };
 	_lampPosition = glm::vec3(1.2f, 1.0f, 2.0f);
-	
 }
 
 
@@ -71,8 +70,8 @@ void Game::initSystems() {
 	int n = 2;
 	GLenum* types = new GLenum[2]{ GL_VERTEX_SHADER,GL_FRAGMENT_SHADER };
 	std::string** paths = new std::string*[n];
-	paths[0] = new std::string[1]{ "vertex.glsl" };
-	paths[1] = new std::string[1]{ "fragment.glsl" };
+	paths[0] = new std::string[1]{ "shaders/vertex.glsl" };
+	paths[1] = new std::string[1]{ "shaders/fragment.glsl" };
 	int* nFiles = new int[2] {1, 1};
 
 	_program = new Shader(n, types, paths, nFiles);
@@ -80,8 +79,8 @@ void Game::initSystems() {
 	int nL = 2;
 	GLenum* typesL = new GLenum[2]{ GL_VERTEX_SHADER,GL_FRAGMENT_SHADER };
 	std::string** pathsL = new std::string*[nL];
-	pathsL[0] = new std::string[1]{ "lightVertex.glsl" };
-	pathsL[1] = new std::string[1]{ "lightFragment.glsl" };
+	pathsL[0] = new std::string[1]{ "shaders/lightVertex.glsl" };
+	pathsL[1] = new std::string[1]{ "shaders/lightFragment.glsl" };
 	int* nFilesL = new int[2]{ 1, 1 };
 
 	_lightProgram = new Shader(nL, typesL, pathsL, nFilesL);
@@ -227,27 +226,11 @@ void Game::draw() {
 	}*/
 
 	
-	_program->use();
+	
 
-	glm::mat4 matrox;
-	matrox = glm::translate(matrox, glm::vec3(0.0f, -1.5f, 0.0f));
-	matrox = glm::scale(matrox, glm::vec3(1.0f));
+	_nano->draw(view, projection);
 
-	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(matrox));
-	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
-	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-
-	testMesh->draw(_program);
-
-	glm::mat4 matrix;
-	matrix = glm::translate(matrix, glm::vec3(0.0f, -1.5f, 0.0f));
-	matrix = glm::scale(matrix, glm::vec3(0.5f));
-
-	glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(matrix));
-	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
-	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-
-	ourModel->draw(_program);
+	
 
 	SDL_GL_SwapWindow(_window);
 }
@@ -256,6 +239,8 @@ void Game::update() {
 	_time = SDL_GetTicks();
 	_deltaTime = (_time - _lastFrame) / 1000;
 	_lastFrame = _time;
+	_fps = 1.0f / _deltaTime;
+
 	if (inputArray[SDLK_ESCAPE]) {
 		_gameState = GameState::EXIT;
 	}
@@ -307,7 +292,7 @@ void Game::update() {
 
 void Game::loadBoard() {
 	
-	_boardX = 3;
+	/*_boardX = 3;
 	_boardY = 3;
 
 	float unit = 1.2f;
@@ -327,9 +312,10 @@ void Game::loadBoard() {
 
 	_board[0][2] = new Entity(_program, _diffuseMap, _specularMap, _vaoCube, glm::vec3(0.0f, 2 * unit, 0.0f));
 	_board[1][2] = new Entity(_program, _diffuseMap, _specularMap, _vaoCube, glm::vec3(unit, 2 * unit, 0.0f));
-	_board[2][2] = new Entity(_program, _diffuseMap, _specularMap, _vaoCube, glm::vec3(2 * unit, 2 * unit, 0.0f));
+	_board[2][2] = new Entity(_program, _diffuseMap, _specularMap, _vaoCube, glm::vec3(2 * unit, 2 * unit, 0.0f));*/
 
-	Texture diffuseTest;
+
+	/*Texture diffuseTest;
 	//diffuseTest.id = utilities::TextureFromFile("body_dif.png", "nanosuit.obj");
 	diffuseTest.id = utilities::TextureFromFile("nanosuit/body_dif.png");
 	diffuseTest.path = "suchkek";
@@ -365,9 +351,10 @@ void Game::loadBoard() {
 
 	std::vector<GLuint> indicesTest = { 0, 1, 2, 1, 2 ,3};
 
-	testMesh = new Mesh(verticesTest, indicesTest, textTest);
+	testMesh = new Mesh(verticesTest, indicesTest, textTest);*/
 
-	ourModel = new Model("nanosuit/nanosuit.obj");
+	ourModel = new Model("models/nanosuit/nanosuit.obj");
+	_nano = new Entity(_program, ourModel, glm::vec3(1.0f), glm::vec3(1.0f));
 }
 
 void Game::genVaos() {

@@ -42,6 +42,9 @@
     <ClCompile Include="Model.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Light.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -65,18 +68,21 @@
     <ClInclude Include="Model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Light.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="fragment.glsl">
+    <None Include="shaders\fragment.glsl">
       <Filter>shaders</Filter>
     </None>
-    <None Include="vertex.glsl">
+    <None Include="shaders\lightFragment.glsl">
       <Filter>shaders</Filter>
     </None>
-    <None Include="lightFragment.glsl">
+    <None Include="shaders\lightVertex.glsl">
       <Filter>shaders</Filter>
     </None>
-    <None Include="lightVertex.glsl">
+    <None Include="shaders\vertex.glsl">
       <Filter>shaders</Filter>
     </None>
   </ItemGroup>

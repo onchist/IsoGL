@@ -19,6 +19,7 @@ struct Texture {
 };
 
 class Mesh {
+
 public:
 
 	std::vector<Vertex> vertices;

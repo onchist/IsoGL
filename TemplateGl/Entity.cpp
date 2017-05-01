@@ -2,14 +2,28 @@
 
 
 
-Entity::Entity(Shader* programID, GLuint diffuseMap, GLuint specularMap, GLuint vaoID, glm::vec3 position) {
-	_programID = programID;
-	_diffuseMap = diffuseMap;
-	_specularMap = specularMap;
-	_vaoID = vaoID;
-	_position = position;
+Entity::Entity(Shader * program, Model * model)
+{
+	_program = program;
+	_model = model;
+	_position = glm::vec3(0.0f);
+	_scale = glm::vec3(1.0f);
 }
 
+Entity::Entity(Shader * program, Model * model, glm::vec3 position)
+{
+	_program = program;
+	_model = model;
+	_position = position;
+	_scale = glm::vec3(1.0f);
+}
+
+Entity::Entity(Shader* program, Model* model, glm::vec3 position, glm::vec3 scale) {
+	_program = program;
+	_model = model;
+	_position = position;
+	_scale = scale;
+}
 
 
 Entity::~Entity()
@@ -18,39 +32,49 @@ Entity::~Entity()
 
 void Entity::draw(glm::mat4 view, glm::mat4 projection)
 {
-	glUniformMatrix4fv(glGetUniformLocation(_programID->getID(), "view"), 1, GL_FALSE, glm::value_ptr(view));
-	glUniformMatrix4fv(glGetUniformLocation(_programID->getID(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+	_program->use();
+	glUniformMatrix4fv(glGetUniformLocation(_program->getID(), "view"), 1, GL_FALSE, glm::value_ptr(view));
+	glUniformMatrix4fv(glGetUniformLocation(_program->getID(), "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, _diffuseMap);
-	glUniform1i(glGetUniformLocation(_programID->getID(), "material.diffuse"), 0);
-
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, _specularMap);
-	glUniform1i(glGetUniformLocation(_programID->getID(), "material.specular"), 1);
-
-
-	_programID->use();
-	glBindVertexArray(_vaoID);
-
-
+	
 	glm::mat4 model;
 	model = glm::translate(model, _position);
-	GLfloat angle = 0.0f;
-	model = glm::rotate(model, angle, glm::vec3(1.0f, 0.0f, 0.0f));
-	glUniformMatrix4fv(glGetUniformLocation(_programID->getID(), "model"), 1, GL_FALSE, glm::value_ptr(model));
+	model = glm::scale(model, _scale);
+	model = glm::rotate(model, 0.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+	glUniformMatrix4fv(glGetUniformLocation(_program->getID(), "model"), 1, GL_FALSE, glm::value_ptr(model));
 	
-	glDrawArrays(GL_TRIANGLES, 0, 36);
+	_model->draw(_program);
 	
-	glBindVertexArray(0);
 }
 
-void Entity::move(glm::vec3 offset)
+
+
+void Entity::offsetPos(glm::vec3 offsetPos)
 {
-	_position += offset;
+	_position += offsetPos;
+}
+
+void Entity::offsetScale(glm::vec3 offsetScale)
+{
+	_scale += offsetScale;
+}
+
+void Entity::setScale(glm::vec3 scale)
+{
+	_scale = scale;
+}
+
+void Entity::setPos(glm::vec3 pos)
+{
+	_position = pos;
 }
 
 glm::vec3 Entity::getPos()
 {
 	return _position;
+}
+
+glm::vec3 Entity::getScale()
+{
+	return _scale;
 }
