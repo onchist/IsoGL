@@ -24,8 +24,8 @@ public:
 	void setScale(glm::vec3 scale);
 	void setPos(glm::vec3 pos);
 
-	glm::vec3 getPos();
-	glm::vec3 getScale();
+	glm::vec3 getPos() const;
+	glm::vec3 getScale() const;
 
 private:
 	Shader* _program;

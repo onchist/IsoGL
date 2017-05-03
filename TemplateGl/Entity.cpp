@@ -69,12 +69,12 @@ void Entity::setPos(glm::vec3 pos)
 	_position = pos;
 }
 
-glm::vec3 Entity::getPos()
+glm::vec3 Entity::getPos() const
 {
 	return _position;
 }
 
-glm::vec3 Entity::getScale()
+glm::vec3 Entity::getScale() const
 {
 	return _scale;
 }

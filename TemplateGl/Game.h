@@ -75,6 +75,7 @@ private:
 	float _fps;
 	Entity* _nano;
 
-	std::vector<PointLight> _pointLights;
+	//std::vector<PointLight> _pointLights;
+	std::vector <Light*> _lights;
 };
 

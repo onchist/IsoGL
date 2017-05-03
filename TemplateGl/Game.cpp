@@ -97,6 +97,8 @@ void Game::freeSystems()
 	SDL_GL_DeleteContext(_glContext);
 	SDL_DestroyWindow(_window);
 	SDL_Quit();
+	delete _program;
+	delete _lightProgram;
 }
 
 void Game::pollEvents() {
@@ -109,17 +111,17 @@ void Game::pollEvents() {
 			break;
 		case SDL_KEYDOWN:
 			_keyPressed = true;
-			if (evnt.key.keysym.sym < 1024) {
+			
 				inputArray[evnt.key.keysym.sym] = true;
 				
-			}
+			
 			break;
 		case SDL_KEYUP:
 			_keyPressed = false;
-			if (evnt.key.keysym.sym < 1024) {
+			
 				inputArray[evnt.key.keysym.sym] = false;
 				_firstInput[evnt.key.keysym.sym] = false;
-			}
+			
 			break;
 		case SDL_MOUSEMOTION:
 			break;
@@ -139,30 +141,33 @@ void Game::draw() {
 	glClearDepth(1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
+	
+
+	_program->use();
+	
+	
+	int pointN = 0;
+	int dirN = 0;
+	int spotN = 0;
+	
+
+	for (int i = 0; i < _lights.size(); i++) {
+				if (_lights[i]->getType() == "pointLights") {
+			_lights[i]->processUniforms(_program, pointN);
+			pointN++;
+		}
+	}
+
+
+	GLint matShineLoc = glGetUniformLocation(_program->getID(), "material.shininess");
+	glUniform1f(matShineLoc, 128.0f);
+	
 	glm::mat4 view;
 	view = _isoCamera.getViewMatrix();
 
 	glm::mat4 projection;
 	projection = glm::perspective(glm::radians(45.0f), (float)_screenWidth / (float)_screenHeight, 0.1f, 100.0f);
 
-	_program->use();
-	
-	GLint matShineLoc = glGetUniformLocation(_program->getID(), "material.shininess");
-	glUniform1f(matShineLoc, 0.6f * 128.0f);
-	
-
-	int pointN = 0;
-	int dirN = 0;
-	int spotN = 0;
-
-	for (int i = 0; i < _pointLights.size(); i++) {
-		_pointLights[i].processUniforms(_program, pointN);
-		pointN++;
-	}
-	
-	
-
-	
 	GLuint modelLoc = glGetUniformLocation(_program->getID(), "model");
 	GLuint viewLoc = glGetUniformLocation(_program->getID(), "view");
 	GLuint projLoc = glGetUniformLocation(_program->getID(), "projection");
@@ -171,12 +176,7 @@ void Game::draw() {
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 	
-	
-
-
 	_nano->draw(view, projection);
-
-	
 
 	SDL_GL_SwapWindow(_window);
 }
@@ -192,36 +192,36 @@ void Game::update() {
 	}
 	_lampPosition.x = sin(_time/1000);
 	if (inputArray[SDLK_z]) {
-		//_isoCamera.move(glm::vec3(0.0f, _deltaTime * 3.0f , 0.0f));
-		if (!_firstInput[SDLK_z]) { 
+		_isoCamera.move(glm::vec3(0.0f, _deltaTime * 3.0f , 0.0f));
+		/*if (!_firstInput[SDLK_z]) { 
 			if (_ptrCoord[1] + 1 < _boardY) {
 				_ptrCoord[1]++; _firstInput[SDLK_z] = true;
 			}
-		}
+		}*/
 	}
 	if (inputArray[SDLK_s]) {
-		//_isoCamera.move(glm::vec3(0.0f, -_deltaTime * 3.0f, 0.0f));
-		if (!_firstInput[SDLK_s]) {
+		_isoCamera.move(glm::vec3(0.0f, -_deltaTime * 3.0f, 0.0f));
+		/*if (!_firstInput[SDLK_s]) {
 			if (_ptrCoord[1] - 1 >= 0) {
 				_ptrCoord[1]--; _firstInput[SDLK_s] = true;
 			}
-		}
+		}*/
 	}
 	if (inputArray[SDLK_d]) {
-		//_isoCamera.move(glm::vec3(_deltaTime * 3.0f, 0.0f, 0.0f));
-		if (!_firstInput[SDLK_d]) {
+		_isoCamera.move(glm::vec3(_deltaTime * 3.0f, 0.0f, 0.0f));
+		/*if (!_firstInput[SDLK_d]) {
 			if (_ptrCoord[0] + 1 < _boardX) {
 				_ptrCoord[0]++; _firstInput[SDLK_d] = true;
 			}
-		}
+		}*/
 	}
 	if (inputArray[SDLK_q]) {
-		//_isoCamera.move(glm::vec3(-_deltaTime * 3.0f, 0.0f, 0.0f));
-		if (!_firstInput[SDLK_q]) {
+		_isoCamera.move(glm::vec3(-_deltaTime * 3.0f, 0.0f, 0.0f));
+		/*if (!_firstInput[SDLK_q]) {
 			if (_ptrCoord[0] - 1 >= 0) {
 				_ptrCoord[0]--; _firstInput[SDLK_q] = true;
 			}
-		}
+		}*/
 	}
 
 	if (inputArray[SDLK_a]) {
@@ -232,14 +232,14 @@ void Game::update() {
 	}
 	
 	//_isoCamera.setTarget(_board[_ptrCoord[0]][_ptrCoord[1]]->getPos());
-	_isoCamera.setTarget(glm::vec3(_ptrCoord[0], _ptrCoord[1], 0.0f));
+	//_isoCamera.setTarget(glm::vec3(_ptrCoord[0], _ptrCoord[1], 0.0f));
 }
 
 
 void Game::loadBoard() {
 	
 	/*_boardX = 3;
-	_boardY = 3;
+	_boardY= 3;
 
 	float unit = 1.2f;
 	_board = new Entity**[_boardX];
@@ -261,43 +261,7 @@ void Game::loadBoard() {
 	_board[2][2] = new Entity(_program, _diffuseMap, _specularMap, _vaoCube, glm::vec3(2 * unit, 2 * unit, 0.0f));*/
 
 
-	/*Texture diffuseTest;
-	//diffuseTest.id = utilities::TextureFromFile("body_dif.png", "nanosuit.obj");
-	diffuseTest.id = utilities::TextureFromFile("nanosuit/body_dif.png");
-	diffuseTest.path = "suchkek";
-	diffuseTest.type = "texture_diffuse";
-	std::vector<Texture> textTest;
-	textTest.push_back(diffuseTest);
-
-	std::vector<Vertex> verticesTest;
-
-	Vertex vertex0;
-	vertex0.position = glm::vec3(0.0f, 0.0f, 0.0f);
-	vertex0.normal = glm::vec3(0.0f, 1.0f, 0.0f);
-	vertex0.texCoords = glm::vec2(0.0f, 0.0f);
-	verticesTest.push_back(vertex0);
-
-	Vertex vertex1;
-	vertex1.position = glm::vec3(1.0f, 0.0f, 0.0f);
-	vertex1.normal = glm::vec3(0.0f, 1.0f, 0.0f);
-	vertex1.texCoords = glm::vec2(1.0f, 0.0f);
-	verticesTest.push_back(vertex1);
-
-	Vertex vertex2;
-	vertex2.position = glm::vec3(0.0f, 1.0f, 0.0f);
-	vertex2.normal = glm::vec3(0.0f, 1.0f, 0.0f);
-	vertex2.texCoords = glm::vec2(0.0f, 1.0f);
-	verticesTest.push_back(vertex2);
-
-	Vertex vertex3;
-	vertex3.position = glm::vec3(1.0f, 1.0f, 0.0f);
-	vertex3.normal = glm::vec3(0.0f, 1.0f, 0.0f);
-	vertex3.texCoords = glm::vec2(1.0f, 1.0f);
-	verticesTest.push_back(vertex3);
-
-	std::vector<GLuint> indicesTest = { 0, 1, 2, 1, 2 ,3};
-
-	testMesh = new Mesh(verticesTest, indicesTest, textTest);*/
+	
 
 	glm::vec3 light = glm::vec3(1.0f, 1.0f, 1.0f);
 	LightMaterial material;
@@ -311,12 +275,12 @@ void Game::loadBoard() {
 	float linear = 0.09f;
 	float quadratic = 0.032f;
 
-	PointLight pointLight(material, position, constant, linear, quadratic);
+	PointLight* pointLight = new PointLight(material, position, constant, linear, quadratic);
 
-	_pointLights.push_back(pointLight);
+	_lights.push_back(pointLight);
 
 	ourModel = new Model("models/nanosuit/nanosuit.obj");
-	_nano = new Entity(_program, ourModel, glm::vec3(1.0f), glm::vec3(0.2f));
+	_nano = new Entity(_program, ourModel, glm::vec3(1.0f), glm::vec3(0.6f));
 }
 
 void Game::genVaos() {
