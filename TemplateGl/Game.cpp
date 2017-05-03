@@ -168,7 +168,6 @@ void Game::draw() {
 	glm::mat4 projection;
 	projection = glm::perspective(glm::radians(45.0f), (float)_screenWidth / (float)_screenHeight, 0.1f, 100.0f);
 
-	GLuint modelLoc = glGetUniformLocation(_program->getID(), "model");
 	GLuint viewLoc = glGetUniformLocation(_program->getID(), "view");
 	GLuint projLoc = glGetUniformLocation(_program->getID(), "projection");
 
@@ -176,7 +175,9 @@ void Game::draw() {
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 	
-	_nano->draw(view, projection);
+	for (int i = 0; i < _entities.size(); i++) {
+		_entities[i]->draw();
+	}
 
 	SDL_GL_SwapWindow(_window);
 }
@@ -269,7 +270,7 @@ void Game::loadBoard() {
 	material.diffuse = light * 0.7f;
 	material.specular = light * 1.0f;
 
-	glm::vec3 position = glm::vec3(0.0f, 0.0f, 5.0f);
+	glm::vec3 position = glm::vec3(-3.0f, -3.0f, 5.0f);
 
 	float constant = 1.0f;
 	float linear = 0.09f;
@@ -280,7 +281,19 @@ void Game::loadBoard() {
 	_lights.push_back(pointLight);
 
 	ourModel = new Model("models/nanosuit/nanosuit.obj");
-	_nano = new Entity(_program, ourModel, glm::vec3(1.0f), glm::vec3(0.6f));
+	_entities.push_back(new Character(_program, glm::vec3(0.0f),ourModel));
+
+	_entities.push_back(new Cell(_program, _diffuseMap, _specularMap, glm::vec3(-1.0f,-1.0f, 0.0f)));
+	_entities.push_back(new Cell(_program, _diffuseMap, _specularMap, glm::vec3(-1.0f,0.0f, 0.0f)));
+	_entities.push_back(new Cell(_program, _diffuseMap, _specularMap, glm::vec3(1.0f, 1.0f, 0.0f)));
+	
+	_entities.push_back(new Cell(_program, _diffuseMap, _specularMap, glm::vec3(0.0f, -1.0f, 0.0f)));
+	_entities.push_back(new Cell(_program, _diffuseMap, _specularMap, glm::vec3(0.0f, 0.0f, 0.0f)));
+	_entities.push_back(new Cell(_program, _diffuseMap, _specularMap, glm::vec3(0.0f, 1.0f, 1.0f)));
+
+	_entities.push_back(new Cell(_program, _diffuseMap, _specularMap, glm::vec3(1.0f, -1.0f, 0.0f)));
+	_entities.push_back(new Cell(_program, _diffuseMap, _specularMap, glm::vec3(1.0f, 0.0f, 0.0f)));
+	_entities.push_back(new Cell(_program, _diffuseMap, _specularMap, glm::vec3(1.0f, 1.0f, 0.0f)));
 }
 
 void Game::genVaos() {
@@ -373,6 +386,8 @@ void Game::genVaos() {
 	glBindVertexArray(0);
 	//unbind the vbo
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	Cell::vaoCube = _vaoCube;
 
 	GLfloat verticesSprite[]{
 		-0.5f, -0.5f, 0.0f, 0.0f, 0.0f,

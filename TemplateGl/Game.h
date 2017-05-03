@@ -15,6 +15,8 @@
 #include <vector>
 #include "Model.h"
 #include "Light.h"
+#include "Character.h"
+#include "Cell.h"
 
 enum class GameState{PLAY,EXIT};
 
@@ -63,8 +65,9 @@ private:
 	bool _firstInput[1024];
 	
 	isoCamera _isoCamera;
-	Entity*** _board;
-	Entity*** _entities;
+	//Entity*** _board;
+	//Entity*** _entities;
+	std::vector<Entity*> _entities;
 	int _boardX;
 	int _boardY;
 	bool _keyPressed;
