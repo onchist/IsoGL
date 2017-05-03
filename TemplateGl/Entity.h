@@ -9,7 +9,7 @@
 class Entity
 {
 public:
-	Entity(Shader* program, glm::vec3 position);
+	Entity(Shader* program);
 	~Entity();
 
 	virtual void draw() = 0;

@@ -4,13 +4,21 @@ GLuint Cell::vaoCube;
 
 float Cell::unity = 1.2f;
 
-Cell::Cell(Shader * program, GLuint diffuseMap, GLuint specularMap, glm::vec3 position): Entity(program, position), _diffuseMap(diffuseMap), _specularMap(specularMap)
+Cell::Cell(Shader * program, GLuint diffuseMap, GLuint specularMap, int x, int y) : Entity(program), _diffuseMap(diffuseMap), _specularMap(specularMap), _x(x), _y(y)
 {
-	
+	_height = 0.5f;
+	_hasUnitHeld = false;
+	_characterHeld = nullptr;
+}
+
+void Cell::update(){
+	_position.x = _x * Cell::unity;
+	_position.y = _y * Cell::unity;
+	_position.z = sin((float)SDL_GetTicks() / 1000.0f);
 }
 
 void Cell::draw(){
-	
+	update();
 
 	_program->use();
 
@@ -30,4 +38,29 @@ void Cell::draw(){
 	glBindVertexArray(Cell::vaoCube);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
+}
+
+glm::vec3 Cell::getTopPos()
+{
+	update();
+	return glm::vec3(_position.x, _position.y, _position.z + _height);
+}
+
+void Cell::linkCharacter(Character* character)
+{
+	_characterHeld = character;
+	_hasUnitHeld = true;
+}
+
+void Cell::unlinkCharacter()
+{
+	_characterHeld = nullptr;
+	_hasUnitHeld = false;
+}
+
+glm::vec3 Cell::getPosition()
+{
+	update();
+	return _position;
+
 }

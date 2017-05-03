@@ -2,14 +2,17 @@
 
 using namespace std;
 
+float Game::_time = 0.0f;
+float Game::_deltaTime = 0.0f;
+float Game::_lastFrame = 0.0f;
+
 //constructeur, initialise les attributs
 Game::Game() {
 	_window = nullptr;
 	_screenWidth = 1024;
 	_screenHeight = 576;
 	_gameState = GameState::PLAY;
-	_deltaTime = 0;
-	_lastFrame = 0;
+	
 	_isoCamera = isoCamera();
 	_ptrCoord = new int[2]{ 0,0 };
 	_lampPosition = glm::vec3(1.2f, 1.0f, 2.0f);
@@ -146,6 +149,7 @@ void Game::draw() {
 	_program->use();
 	
 	
+	
 	int pointN = 0;
 	int dirN = 0;
 	int spotN = 0;
@@ -183,17 +187,17 @@ void Game::draw() {
 }
 
 void Game::update() {
-	_time = SDL_GetTicks();
-	_deltaTime = (_time - _lastFrame) / 1000;
-	_lastFrame = _time;
+	Game::_time = SDL_GetTicks();
+	Game::_deltaTime = (_time - _lastFrame) / 1000;
+	Game::_lastFrame = _time;
 	_fps = 1.0f / _deltaTime;
 
 	if (inputArray[SDLK_ESCAPE]) {
 		_gameState = GameState::EXIT;
 	}
-	_lampPosition.x = sin(_time/1000);
+	_lampPosition.x = sin(Game::_time/1000);
 	if (inputArray[SDLK_z]) {
-		_isoCamera.move(glm::vec3(0.0f, _deltaTime * 3.0f , 0.0f));
+		_isoCamera.move(glm::vec3(0.0f, Game::_deltaTime * 3.0f , 0.0f));
 		/*if (!_firstInput[SDLK_z]) { 
 			if (_ptrCoord[1] + 1 < _boardY) {
 				_ptrCoord[1]++; _firstInput[SDLK_z] = true;
@@ -201,7 +205,7 @@ void Game::update() {
 		}*/
 	}
 	if (inputArray[SDLK_s]) {
-		_isoCamera.move(glm::vec3(0.0f, -_deltaTime * 3.0f, 0.0f));
+		_isoCamera.move(glm::vec3(0.0f, -Game::_deltaTime * 3.0f, 0.0f));
 		/*if (!_firstInput[SDLK_s]) {
 			if (_ptrCoord[1] - 1 >= 0) {
 				_ptrCoord[1]--; _firstInput[SDLK_s] = true;
@@ -209,7 +213,7 @@ void Game::update() {
 		}*/
 	}
 	if (inputArray[SDLK_d]) {
-		_isoCamera.move(glm::vec3(_deltaTime * 3.0f, 0.0f, 0.0f));
+		_isoCamera.move(glm::vec3(Game::_deltaTime * 3.0f, 0.0f, 0.0f));
 		/*if (!_firstInput[SDLK_d]) {
 			if (_ptrCoord[0] + 1 < _boardX) {
 				_ptrCoord[0]++; _firstInput[SDLK_d] = true;
@@ -217,7 +221,7 @@ void Game::update() {
 		}*/
 	}
 	if (inputArray[SDLK_q]) {
-		_isoCamera.move(glm::vec3(-_deltaTime * 3.0f, 0.0f, 0.0f));
+		_isoCamera.move(glm::vec3(-Game::_deltaTime * 3.0f, 0.0f, 0.0f));
 		/*if (!_firstInput[SDLK_q]) {
 			if (_ptrCoord[0] - 1 >= 0) {
 				_ptrCoord[0]--; _firstInput[SDLK_q] = true;
@@ -226,10 +230,10 @@ void Game::update() {
 	}
 
 	if (inputArray[SDLK_a]) {
-		_isoCamera.rotate(_deltaTime * 1.0f);
+		_isoCamera.rotate(Game::_deltaTime * 1.0f);
 	}
 	if (inputArray[SDLK_e]) {
-		_isoCamera.rotate(_deltaTime * -1.0f);
+		_isoCamera.rotate(Game::_deltaTime * -1.0f);
 	}
 	
 	//_isoCamera.setTarget(_board[_ptrCoord[0]][_ptrCoord[1]]->getPos());
@@ -273,27 +277,32 @@ void Game::loadBoard() {
 	glm::vec3 position = glm::vec3(-3.0f, -3.0f, 5.0f);
 
 	float constant = 1.0f;
-	float linear = 0.09f;
-	float quadratic = 0.032f;
+	float linear = 0.045f;
+	float quadratic = 0.0075f;
 
 	PointLight* pointLight = new PointLight(material, position, constant, linear, quadratic);
 
 	_lights.push_back(pointLight);
 
-	ourModel = new Model("models/nanosuit/nanosuit.obj");
-	_entities.push_back(new Character(_program, glm::vec3(0.0f),ourModel));
+	ourModel = new Model("models/MaleLow/MaleLow.obj");
 
-	_entities.push_back(new Cell(_program, _diffuseMap, _specularMap, glm::vec3(-1.0f,-1.0f, 0.0f)));
-	_entities.push_back(new Cell(_program, _diffuseMap, _specularMap, glm::vec3(-1.0f,0.0f, 0.0f)));
-	_entities.push_back(new Cell(_program, _diffuseMap, _specularMap, glm::vec3(1.0f, 1.0f, 0.0f)));
+	Cell* cell0 = new Cell(_program, _diffuseMap, _specularMap, -1, -1);
+	Cell* cell1 = new Cell(_program, _diffuseMap, _specularMap, 0, 0);
+	Cell* cell2 = new Cell(_program, _diffuseMap, _specularMap, 1, 1);
+
+	Character* character0 = new Character(_program, ourModel, cell0);
+	Character* character1 = new Character(_program, ourModel, cell1);
+	Character* character2 = new Character(_program, ourModel, cell2);
+
+
+	_entities.push_back(character0);
+	_entities.push_back(character1);
+	_entities.push_back(character2);
+
+	_entities.push_back(cell0);
+	_entities.push_back(cell1);
+	_entities.push_back(cell2);
 	
-	_entities.push_back(new Cell(_program, _diffuseMap, _specularMap, glm::vec3(0.0f, -1.0f, 0.0f)));
-	_entities.push_back(new Cell(_program, _diffuseMap, _specularMap, glm::vec3(0.0f, 0.0f, 0.0f)));
-	_entities.push_back(new Cell(_program, _diffuseMap, _specularMap, glm::vec3(0.0f, 1.0f, 1.0f)));
-
-	_entities.push_back(new Cell(_program, _diffuseMap, _specularMap, glm::vec3(1.0f, -1.0f, 0.0f)));
-	_entities.push_back(new Cell(_program, _diffuseMap, _specularMap, glm::vec3(1.0f, 0.0f, 0.0f)));
-	_entities.push_back(new Cell(_program, _diffuseMap, _specularMap, glm::vec3(1.0f, 1.0f, 0.0f)));
 }
 
 void Game::genVaos() {

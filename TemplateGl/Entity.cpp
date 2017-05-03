@@ -1,7 +1,7 @@
 #include "Entity.h"
 
 
-Entity::Entity(Shader* program, glm::vec3 position): _program(program), _position(position)
+Entity::Entity(Shader* program): _program(program), _position(glm::vec3(0.0f))
 {
 
 }

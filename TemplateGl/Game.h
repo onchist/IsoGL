@@ -20,6 +20,7 @@
 
 enum class GameState{PLAY,EXIT};
 
+
 class Game
 {
 public:
@@ -28,7 +29,9 @@ public:
 
 	void run();
 	
-	
+	static float _time;
+	static float _lastFrame;
+	static float _deltaTime;
 
 private:
 	void draw();
@@ -52,9 +55,7 @@ private:
 	GLuint _vaoSprite;
 	GLuint _vaoLight;
 
-	float _time;
-	float _lastFrame;
-	float _deltaTime;
+	
 
 	Shader* _program;
 	Shader* _lightProgram;
