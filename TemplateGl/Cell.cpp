@@ -14,7 +14,7 @@ Cell::Cell(Shader * program, GLuint diffuseMap, GLuint specularMap, int x, int y
 void Cell::update(){
 	_position.x = _x * Cell::unity;
 	_position.y = _y * Cell::unity;
-	_position.z = sin((float)SDL_GetTicks() / 1000.0f);
+	_position.z = 0.0f;
 }
 
 void Cell::draw(){
@@ -58,9 +58,19 @@ void Cell::unlinkCharacter()
 	_hasUnitHeld = false;
 }
 
+Character * Cell::_getCharacterPtr()
+{
+	return _characterHeld;
+}
+
 glm::vec3 Cell::getPosition()
 {
 	update();
 	return _position;
 
+}
+
+bool Cell::holdsUnit()
+{
+	return _hasUnitHeld;
 }

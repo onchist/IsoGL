@@ -14,8 +14,11 @@ public:
 	glm::vec3 getTopPos();
 	void linkCharacter(Character* character);
 	void unlinkCharacter();
+	Character* _getCharacterPtr();
 	glm::vec3 getPosition();
+	bool holdsUnit();
 protected:
+	bool _hasUnitHeld;
 	void update();
 	GLuint _diffuseMap;
 	GLuint _specularMap;
@@ -23,6 +26,5 @@ protected:
 	int _x;
 	int _y;
 	float _height;
-	bool _hasUnitHeld;
 	Character* _characterHeld;
 };

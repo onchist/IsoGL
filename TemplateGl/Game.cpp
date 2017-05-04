@@ -14,8 +14,9 @@ Game::Game() {
 	_gameState = GameState::PLAY;
 	
 	_isoCamera = isoCamera();
-	_ptrCoord = new int[2]{ 0,0 };
-	_lampPosition = glm::vec3(1.2f, 1.0f, 2.0f);
+	_focusX = 0;
+	_focusY = 0;
+	_keyPressed = 0;
 }
 
 
@@ -62,6 +63,9 @@ void Game::initSystems() {
 	//mise en place du double buffering
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, true);
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	SDL_GL_SetSwapInterval(1);
 	//couleur de fond d'écran au glClear()
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -113,18 +117,19 @@ void Game::pollEvents() {
 			_gameState = GameState::EXIT;
 			break;
 		case SDL_KEYDOWN:
-			_keyPressed = true;
-			
-				inputArray[evnt.key.keysym.sym] = true;
-				
-			
+			if (!_inputArray[evnt.key.keysym.sym]) {
+				_keyPressed++;
+				_inputArray[evnt.key.keysym.sym] = true;
+				_firstInput[evnt.key.keysym.sym] = true;
+			}
+			else {
+				_firstInput[evnt.key.keysym.sym] = false;
+			}
 			break;
 		case SDL_KEYUP:
-			_keyPressed = false;
-			
-				inputArray[evnt.key.keysym.sym] = false;
-				_firstInput[evnt.key.keysym.sym] = false;
-			
+			_keyPressed--;
+			_inputArray[evnt.key.keysym.sym] = false;
+			_firstInput[evnt.key.keysym.sym] = false;
 			break;
 		case SDL_MOUSEMOTION:
 			break;
@@ -144,21 +149,24 @@ void Game::draw() {
 	glClearDepth(1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
-	
-
 	_program->use();
-	
-	
 	
 	int pointN = 0;
 	int dirN = 0;
 	int spotN = 0;
 	
-
 	for (int i = 0; i < _lights.size(); i++) {
-				if (_lights[i]->getType() == "pointLights") {
+		if (_lights[i]->getType() == "pointLights") {
 			_lights[i]->processUniforms(_program, pointN);
 			pointN++;
+		}
+		else if (_lights[i]->getType() == "dirLights") {
+			_lights[i]->processUniforms(_program, dirN);
+			dirN++;
+		}
+		else if (_lights[i]->getType() == "spotLights") {
+			_lights[i]->processUniforms(_program, spotN);
+			spotN++;
 		}
 	}
 
@@ -179,9 +187,15 @@ void Game::draw() {
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 	
-	for (int i = 0; i < _entities.size(); i++) {
+	for(int i = 0; i < _entities.size(); i++) {
 		_entities[i]->draw();
 	}
+
+	for (int i = 0; i < _board.size(); i++) {
+		_board[i]->draw();
+	}
+
+	drawInfoTab();
 
 	SDL_GL_SwapWindow(_window);
 }
@@ -192,82 +206,47 @@ void Game::update() {
 	Game::_lastFrame = _time;
 	_fps = 1.0f / _deltaTime;
 
-	if (inputArray[SDLK_ESCAPE]) {
+	if (_inputArray[SDLK_ESCAPE]) {
 		_gameState = GameState::EXIT;
 	}
-	_lampPosition.x = sin(Game::_time/1000);
-	if (inputArray[SDLK_z]) {
-		_isoCamera.move(glm::vec3(0.0f, Game::_deltaTime * 3.0f , 0.0f));
-		/*if (!_firstInput[SDLK_z]) { 
-			if (_ptrCoord[1] + 1 < _boardY) {
-				_ptrCoord[1]++; _firstInput[SDLK_z] = true;
-			}
-		}*/
+
+	if (_firstInput[SDLK_z]) {
+		_firstInput[SDLK_z] = false;
+		if (_focusY + 1 < _boardY) {
+			_focusY++;
+		}
 	}
-	if (inputArray[SDLK_s]) {
-		_isoCamera.move(glm::vec3(0.0f, -Game::_deltaTime * 3.0f, 0.0f));
-		/*if (!_firstInput[SDLK_s]) {
-			if (_ptrCoord[1] - 1 >= 0) {
-				_ptrCoord[1]--; _firstInput[SDLK_s] = true;
-			}
-		}*/
+	if (_firstInput[SDLK_s]) {
+		_firstInput[SDLK_s] = false;
+		if (_focusY - 1 >= 0) {
+			_focusY--;
+		}
 	}
-	if (inputArray[SDLK_d]) {
-		_isoCamera.move(glm::vec3(Game::_deltaTime * 3.0f, 0.0f, 0.0f));
-		/*if (!_firstInput[SDLK_d]) {
-			if (_ptrCoord[0] + 1 < _boardX) {
-				_ptrCoord[0]++; _firstInput[SDLK_d] = true;
-			}
-		}*/
+	if (_firstInput[SDLK_d]) {
+		_firstInput[SDLK_d] = false;
+		if (_focusX + 1 < _boardX) {
+			_focusX++;
+		}
 	}
-	if (inputArray[SDLK_q]) {
-		_isoCamera.move(glm::vec3(-Game::_deltaTime * 3.0f, 0.0f, 0.0f));
-		/*if (!_firstInput[SDLK_q]) {
-			if (_ptrCoord[0] - 1 >= 0) {
-				_ptrCoord[0]--; _firstInput[SDLK_q] = true;
-			}
-		}*/
+	if (_firstInput[SDLK_q]) {
+		_firstInput[SDLK_q] = false;
+		if (_focusX - 1 >= 0) {
+			_focusX--;
+		}
 	}
 
-	if (inputArray[SDLK_a]) {
+	if (_inputArray[SDLK_a]) {
 		_isoCamera.rotate(Game::_deltaTime * 1.0f);
 	}
-	if (inputArray[SDLK_e]) {
+	if (_inputArray[SDLK_e]) {
 		_isoCamera.rotate(Game::_deltaTime * -1.0f);
 	}
-	
-	//_isoCamera.setTarget(_board[_ptrCoord[0]][_ptrCoord[1]]->getPos());
-	//_isoCamera.setTarget(glm::vec3(_ptrCoord[0], _ptrCoord[1], 0.0f));
+
+	_isoCamera.setTarget(_board[_focusX + _focusY * _boardX]->getTopPos());
 }
 
 
 void Game::loadBoard() {
-	
-	/*_boardX = 3;
-	_boardY= 3;
-
-	float unit = 1.2f;
-	_board = new Entity**[_boardX];
-
-	for (int i = 0; i < _boardX; i++) {
-		_board[i] = new Entity*[_boardY];
-	}
-
-	_board[0][0] = new Entity(_program, _diffuseMap, _specularMap, _vaoCube, glm::vec3(0.0f, 0.0f, 0.0f));
-	_board[1][0] = new Entity(_program, _diffuseMap, _specularMap, _vaoCube, glm::vec3(unit, 0.0f, 0.0f));
-	_board[2][0] = new Entity(_program, _diffuseMap, _specularMap, _vaoCube, glm::vec3(2 * unit, 0.0f, 0.0f));
-
-	_board[0][1] = new Entity(_program, _diffuseMap, _specularMap, _vaoCube, glm::vec3(0.0f, unit, 0.0f));
-	_board[1][1] = new Entity(_program, _diffuseMap, _specularMap, _vaoCube, glm::vec3(unit, unit, 0.0f));
-	_board[2][1] = new Entity(_program, _diffuseMap, _specularMap, _vaoCube, glm::vec3(2 * unit, unit, 0.0f));
-
-	_board[0][2] = new Entity(_program, _diffuseMap, _specularMap, _vaoCube, glm::vec3(0.0f, 2 * unit, 0.0f));
-	_board[1][2] = new Entity(_program, _diffuseMap, _specularMap, _vaoCube, glm::vec3(unit, 2 * unit, 0.0f));
-	_board[2][2] = new Entity(_program, _diffuseMap, _specularMap, _vaoCube, glm::vec3(2 * unit, 2 * unit, 0.0f));*/
-
-
-	
-
 	glm::vec3 light = glm::vec3(1.0f, 1.0f, 1.0f);
 	LightMaterial material;
 	material.ambient = light * 0.2f;
@@ -284,25 +263,25 @@ void Game::loadBoard() {
 
 	_lights.push_back(pointLight);
 
-	ourModel = new Model("models/MaleLow/MaleLow.obj");
+	Model* ourModel = new Model("models/MaleLow/MaleLow.obj");
 
-	Cell* cell0 = new Cell(_program, _diffuseMap, _specularMap, -1, -1);
-	Cell* cell1 = new Cell(_program, _diffuseMap, _specularMap, 0, 0);
-	Cell* cell2 = new Cell(_program, _diffuseMap, _specularMap, 1, 1);
+	_boardX = 3;
+	_boardY = 3;
 
-	Character* character0 = new Character(_program, ourModel, cell0);
-	Character* character1 = new Character(_program, ourModel, cell1);
-	Character* character2 = new Character(_program, ourModel, cell2);
+	_board.push_back(new Cell(_program, _diffuseMap, _specularMap, 0, 0));
+	_board.push_back(new Cell(_program, _diffuseMap, _specularMap, 1, 0));
+	_board.push_back(new Cell(_program, _diffuseMap, _specularMap, 2, 0));
 
+	_board.push_back(new Cell(_program, _diffuseMap, _specularMap, 0, 1));
+	_board.push_back(new Cell(_program, _diffuseMap, _specularMap, 1, 1));
+	_board.push_back(new Cell(_program, _diffuseMap, _specularMap, 2, 1));
 
+	_board.push_back(new Cell(_program, _diffuseMap, _specularMap, 0, 2));
+	_board.push_back(new Cell(_program, _diffuseMap, _specularMap, 1, 2));
+	_board.push_back(new Cell(_program, _diffuseMap, _specularMap, 2, 2));
+
+	Character* character0 = new Character(_program, ourModel, _board[1 + _boardY * 1]);
 	_entities.push_back(character0);
-	_entities.push_back(character1);
-	_entities.push_back(character2);
-
-	_entities.push_back(cell0);
-	_entities.push_back(cell1);
-	_entities.push_back(cell2);
-	
 }
 
 void Game::genVaos() {
@@ -438,6 +417,17 @@ void Game::genVaos() {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 
+}
+
+void Game::drawInfoTab(){
+	system("cls");
+	std::cout << "InfoTab Begin : " << std::endl;
+
+	if (_board[_focusX + _focusY * _boardX]->holdsUnit()) {
+		std::cout << "Unit name : " << _board[_focusX + _focusY * _boardX]->_getCharacterPtr()->getName() << std::endl;
+	}
+
+	std::cout << "InfoTab Ends" << std::endl;
 }
 
 

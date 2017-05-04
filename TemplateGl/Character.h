@@ -16,13 +16,20 @@ public:
 
 	void setScale(glm::vec3 scale);
 	void setPos(glm::vec3 pos);
+	std::string getName();
 
 	glm::vec3 getPos() const;
 	glm::vec3 getScale() const;
 
 protected:
 	void update();
+
 	Cell* _cellOn;
+	std::string _name;
+
 	Model* _model;
 	glm::vec3 _scale;
+	float _rotX;
+	float _rotY;
+	float _rotZ;
 };
