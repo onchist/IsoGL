@@ -14,6 +14,7 @@ Character::Character(Shader * program, Model* model, Cell* cellOn) : Entity(prog
 	_rotY = glm::radians(0.0f);
 	_rotZ = glm::radians(0.0f);
 	_name = "placeholder";
+	_team = BLUE;
 }
 
 
@@ -31,6 +32,16 @@ void Character::draw()
 {
 	update();
 	glUniform1i(glGetUniformLocation(_program->getID(), "uniColored"), true);
+	glm::vec3 color;
+	if (_selected) {
+		color = glm::vec3(0.0f, 0.0f, 0.5f);
+	}
+	else {
+		color = glm::vec3(0.5f, 0.5f, 0.5f);
+	}
+	glUniform3f(glGetUniformLocation(_program->getID(), "uniColorDiffuse"), color.x, color.y, color.z);
+	glUniform3f(glGetUniformLocation(_program->getID(), "uniColorSpecular"), 1.0f, 1.0f, 1.0f);
+
 	glm::mat4 model;
 	model = glm::translate(model, _position);
 
@@ -68,4 +79,36 @@ std::string Character::getName()
 glm::vec3 Character::getScale() const
 {
 	return _scale;
+}
+
+int Character::getX() const
+{
+	return _cellOn->getX();
+}
+
+int Character::getY() const
+{
+	return _cellOn->getY();
+}
+
+Team Character::getTeam() const
+{
+	return _team;
+}
+
+void Character::setSelected(bool selected)
+{
+	_selected = selected;
+}
+
+void Character::setCellOn(Cell * cellOn)
+{
+	_cellOn->unlinkCharacter();
+	_cellOn = cellOn;
+	_cellOn->linkCharacter(this);
+}
+
+void Character::setTeam(Team team)
+{
+	_team = team;
 }

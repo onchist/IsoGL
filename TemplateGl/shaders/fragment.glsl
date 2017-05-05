@@ -43,8 +43,10 @@ in mat4 viewFrag;
 out vec4 color;
 
 uniform Material material;
-uniform PointLight light;
 uniform bool uniColored;
+
+uniform vec3 uniColorDiffuse;
+uniform vec3 uniColorSpecular;
 
 vec3 calcDirLight(DirLight light, vec3 normal, mat4 view);
 vec3 calcPointLight(PointLight light, vec3 normal, vec3 fragPos, mat4 view);
@@ -57,8 +59,8 @@ void main()
 	
 
 	if(uniColored){
-		materialDif = vec3(1.0, 1.0, 1.0);
-		materialSpec = vec3(1.0, 1.0, 1.0);
+		materialDif = uniColorDiffuse;
+		materialSpec = uniColorSpecular;
 	}
 	else{
 		materialDif = vec3(texture(material.texture_diffuse1, TexCoords));

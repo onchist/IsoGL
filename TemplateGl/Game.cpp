@@ -11,12 +11,13 @@ Game::Game() {
 	_window = nullptr;
 	_screenWidth = 1024;
 	_screenHeight = 576;
-	_gameState = GameState::PLAY;
+	_gameState = FREE;
 	
 	_isoCamera = isoCamera();
 	_focusX = 0;
 	_focusY = 0;
 	_keyPressed = 0;
+	_playerTeam = BLUE;
 }
 
 
@@ -148,13 +149,13 @@ void Game::gameLoop() {
 void Game::draw() {
 	glClearDepth(1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
+
 	_program->use();
-	
+
 	int pointN = 0;
 	int dirN = 0;
 	int spotN = 0;
-	
+
 	for (int i = 0; i < _lights.size(); i++) {
 		if (_lights[i]->getType() == "pointLights") {
 			_lights[i]->processUniforms(_program, pointN);
@@ -173,7 +174,7 @@ void Game::draw() {
 
 	GLint matShineLoc = glGetUniformLocation(_program->getID(), "material.shininess");
 	glUniform1f(matShineLoc, 128.0f);
-	
+
 	glm::mat4 view;
 	view = _isoCamera.getViewMatrix();
 
@@ -186,8 +187,8 @@ void Game::draw() {
 
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
-	
-	for(int i = 0; i < _entities.size(); i++) {
+
+	for (int i = 0; i < _entities.size(); i++) {
 		_entities[i]->draw();
 	}
 
@@ -210,39 +211,66 @@ void Game::update() {
 		_gameState = GameState::EXIT;
 	}
 
-	if (_firstInput[SDLK_z]) {
-		_firstInput[SDLK_z] = false;
-		if (_focusY + 1 < _boardY) {
-			_focusY++;
+	
+	_board[_focusX + _focusY * _boardX]->setFocused(false);
+		if (_firstInput[SDLK_z]) {
+			_firstInput[SDLK_z] = false;
+			if (_focusY + 1 < _boardY) {
+				_focusY++;
+			}
 		}
-	}
-	if (_firstInput[SDLK_s]) {
-		_firstInput[SDLK_s] = false;
-		if (_focusY - 1 >= 0) {
-			_focusY--;
+		if (_firstInput[SDLK_s]) {
+			_firstInput[SDLK_s] = false;
+			if (_focusY - 1 >= 0) {
+				_focusY--;
+			}
 		}
-	}
-	if (_firstInput[SDLK_d]) {
-		_firstInput[SDLK_d] = false;
-		if (_focusX + 1 < _boardX) {
-			_focusX++;
+		if (_firstInput[SDLK_d]) {
+			_firstInput[SDLK_d] = false;
+			if (_focusX + 1 < _boardX) {
+				_focusX++;
+			}
 		}
-	}
-	if (_firstInput[SDLK_q]) {
-		_firstInput[SDLK_q] = false;
-		if (_focusX - 1 >= 0) {
-			_focusX--;
+		if (_firstInput[SDLK_q]) {
+			_firstInput[SDLK_q] = false;
+			if (_focusX - 1 >= 0) {
+				_focusX--;
+			}
 		}
-	}
+		if (_gameState == FREE) {
+			if (_firstInput[SDLK_e]) {
+				_firstInput[SDLK_e] = false;
+				if (_board[_focusX + _focusY * _boardX]->holdsUnit()) {
+					if (_board[_focusX + _focusY * _boardX]->getCharacterPtr()->getTeam() == _playerTeam) {
+						_gameState = SELECTED;
+						_selectedCharacter = _board[_focusX + _focusY * _boardX]->getCharacterPtr();
+						_selectedCharacter->setSelected(true);
+					}
+				}
+			}
+		}
+		_board[_focusX + _focusY * _boardX]->setFocused(true);
+		_isoCamera.setTarget(_board[_focusX + _focusY * _boardX]->getTopPos());
+	
 
-	if (_inputArray[SDLK_a]) {
-		_isoCamera.rotate(Game::_deltaTime * 1.0f);
+	if (_gameState == SELECTED) {
+		if (_firstInput[SDLK_BACKSPACE]) {
+			_firstInput[SDLK_BACKSPACE] = false;
+			_gameState = FREE;
+			_selectedCharacter->setSelected(false);
+			_selectedCharacter = nullptr;
+		}
+		if (_firstInput[SDLK_e]) {
+			std::cout << "tried" << std::endl;
+			_firstInput[SDLK_e] = false;
+			if (!_board[_focusX + _focusY * _boardX]->holdsUnit()){
+				_selectedCharacter->setCellOn(_board[_focusX + _focusY * _boardX]);
+				_selectedCharacter->setSelected(false);
+				_selectedCharacter = nullptr;
+				_gameState = FREE;
+			}
+		}
 	}
-	if (_inputArray[SDLK_e]) {
-		_isoCamera.rotate(Game::_deltaTime * -1.0f);
-	}
-
-	_isoCamera.setTarget(_board[_focusX + _focusY * _boardX]->getTopPos());
 }
 
 
@@ -263,25 +291,23 @@ void Game::loadBoard() {
 
 	_lights.push_back(pointLight);
 
+	
+
+	_boardX = 5;
+	_boardY = 5;
+
+	for (int y = 0; y < _boardY; y++) {
+		for (int x = 0; x < _boardX; x++) {
+			_board.push_back(new Cell(_program, _diffuseMap, _specularMap, x, y));
+		}
+	}
+
+	
+
 	Model* ourModel = new Model("models/MaleLow/MaleLow.obj");
-
-	_boardX = 3;
-	_boardY = 3;
-
-	_board.push_back(new Cell(_program, _diffuseMap, _specularMap, 0, 0));
-	_board.push_back(new Cell(_program, _diffuseMap, _specularMap, 1, 0));
-	_board.push_back(new Cell(_program, _diffuseMap, _specularMap, 2, 0));
-
-	_board.push_back(new Cell(_program, _diffuseMap, _specularMap, 0, 1));
-	_board.push_back(new Cell(_program, _diffuseMap, _specularMap, 1, 1));
-	_board.push_back(new Cell(_program, _diffuseMap, _specularMap, 2, 1));
-
-	_board.push_back(new Cell(_program, _diffuseMap, _specularMap, 0, 2));
-	_board.push_back(new Cell(_program, _diffuseMap, _specularMap, 1, 2));
-	_board.push_back(new Cell(_program, _diffuseMap, _specularMap, 2, 2));
-
-	Character* character0 = new Character(_program, ourModel, _board[1 + _boardY * 1]);
-	_entities.push_back(character0);
+	_entities.push_back(new Character(_program, ourModel, _board[1 + _boardY * 1]));
+	_entities.push_back(new Character(_program, ourModel, _board[2 + _boardY * 2]));
+	_board[2 + _boardY * 2]->getCharacterPtr()->setTeam(RED);
 }
 
 void Game::genVaos() {
@@ -424,7 +450,19 @@ void Game::drawInfoTab(){
 	std::cout << "InfoTab Begin : " << std::endl;
 
 	if (_board[_focusX + _focusY * _boardX]->holdsUnit()) {
-		std::cout << "Unit name : " << _board[_focusX + _focusY * _boardX]->_getCharacterPtr()->getName() << std::endl;
+		Character* character = _board[_focusX + _focusY * _boardX]->getCharacterPtr();
+		std::cout << "Unit name : " << character->getName() << std::endl;
+		switch (character->getTeam()) {
+		default:
+			std::cout << "default team" << std::endl;
+			break;
+		case BLUE:
+			std::cout << "BLUE" << std::endl;
+			break;
+		case RED:
+			std::cout << "RED" << std::endl;
+			break;
+		}
 	}
 
 	std::cout << "InfoTab Ends" << std::endl;

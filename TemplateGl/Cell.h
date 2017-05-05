@@ -14,9 +14,12 @@ public:
 	glm::vec3 getTopPos();
 	void linkCharacter(Character* character);
 	void unlinkCharacter();
-	Character* _getCharacterPtr();
+	Character* getCharacterPtr();
 	glm::vec3 getPosition();
 	bool holdsUnit();
+	void setFocused(bool isFocused);
+	int getX();
+	int getY();
 protected:
 	bool _hasUnitHeld;
 	void update();
@@ -27,4 +30,5 @@ protected:
 	int _y;
 	float _height;
 	Character* _characterHeld;
+	bool _focused;
 };

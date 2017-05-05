@@ -20,7 +20,7 @@
 #include "Cell.h"
 #include <stdlib.h>
 
-enum class GameState{PLAY,EXIT};
+enum GameState{FREE, SELECTED, TARGETING, EXIT};
 
 
 class Game
@@ -36,6 +36,7 @@ public:
 	static float _deltaTime;
 
 private:
+	Team _playerTeam;
 	void draw();
 
 	void update();
@@ -65,7 +66,7 @@ private:
 
 	GLuint _diffuseMap;
 	GLuint _specularMap;
-
+	Character* _selectedCharacter;
 	std::map<int,bool> _inputArray;
 	std::map<int, bool> _firstInput;
 	

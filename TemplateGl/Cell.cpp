@@ -9,6 +9,7 @@ Cell::Cell(Shader * program, GLuint diffuseMap, GLuint specularMap, int x, int y
 	_height = 0.5f;
 	_hasUnitHeld = false;
 	_characterHeld = nullptr;
+	_focused = false;
 }
 
 void Cell::update(){
@@ -21,6 +22,13 @@ void Cell::draw(){
 	update();
 
 	_program->use();
+
+	if (_focused) {
+		glUniform1i(glGetUniformLocation(_program->getID(), "uniColored"), true);
+		glm::vec3 color(0.0f, 0.5f, 0.0f);
+		glUniform3f(glGetUniformLocation(_program->getID(), "uniColorDiffuse"), color.x, color.y, color.z);
+		glUniform3f(glGetUniformLocation(_program->getID(), "uniColorSpecular"), 1.0f, 1.0f, 1.0f);
+	}
 
 	glm::mat4 model; 
 	model = glm::translate(model, _position);
@@ -38,6 +46,10 @@ void Cell::draw(){
 	glBindVertexArray(Cell::vaoCube);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
+
+	if (_focused) {
+		glUniform1i(glGetUniformLocation(_program->getID(), "uniColored"), false);
+	}
 }
 
 glm::vec3 Cell::getTopPos()
@@ -58,7 +70,7 @@ void Cell::unlinkCharacter()
 	_hasUnitHeld = false;
 }
 
-Character * Cell::_getCharacterPtr()
+Character * Cell::getCharacterPtr()
 {
 	return _characterHeld;
 }
@@ -73,4 +85,19 @@ glm::vec3 Cell::getPosition()
 bool Cell::holdsUnit()
 {
 	return _hasUnitHeld;
+}
+
+void Cell::setFocused(bool isFocused)
+{
+	_focused = isFocused;
+}
+
+int Cell::getX()
+{
+	return _x;
+}
+
+int Cell::getY()
+{
+	return _y;
 }
