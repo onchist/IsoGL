@@ -18,6 +18,7 @@ public:
 	glm::vec3 getPosition();
 	bool holdsUnit();
 	void setFocused(bool isFocused);
+	void setReachable(bool isReachable);
 	int getX();
 	int getY();
 protected:
@@ -31,4 +32,5 @@ protected:
 	float _height;
 	Character* _characterHeld;
 	bool _focused;
+	bool _reachable;
 };

@@ -15,6 +15,8 @@ Character::Character(Shader * program, Model* model, Cell* cellOn) : Entity(prog
 	_rotZ = glm::radians(0.0f);
 	_name = "placeholder";
 	_team = BLUE;
+	_used = false;
+	_reach = 3;
 }
 
 
@@ -34,11 +36,19 @@ void Character::draw()
 	glUniform1i(glGetUniformLocation(_program->getID(), "uniColored"), true);
 	glm::vec3 color;
 	if (_selected) {
+		color = glm::vec3(0.0f, 0.5f, 0.0f);
+	}
+	else  if (_team == BLUE){
 		color = glm::vec3(0.0f, 0.0f, 0.5f);
 	}
-	else {
-		color = glm::vec3(0.5f, 0.5f, 0.5f);
+	else  if (_team == RED) {
+		color = glm::vec3(0.5f, 0.0f, 0.0f);
 	}
+
+	if (_used) {
+		color *= 0.2f;
+	}
+
 	glUniform3f(glGetUniformLocation(_program->getID(), "uniColorDiffuse"), color.x, color.y, color.z);
 	glUniform3f(glGetUniformLocation(_program->getID(), "uniColorSpecular"), 1.0f, 1.0f, 1.0f);
 
@@ -111,4 +121,19 @@ void Character::setCellOn(Cell * cellOn)
 void Character::setTeam(Team team)
 {
 	_team = team;
+}
+
+bool Character::isUsed()
+{
+	return _used;
+}
+
+void Character::setUsed(bool used)
+{
+	_used = used;
+}
+
+int Character::getReach()
+{
+	return _reach;
 }

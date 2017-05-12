@@ -30,6 +30,13 @@ void Cell::draw(){
 		glUniform3f(glGetUniformLocation(_program->getID(), "uniColorSpecular"), 1.0f, 1.0f, 1.0f);
 	}
 
+	if (_reachable) {
+		glUniform1i(glGetUniformLocation(_program->getID(), "uniColored"), true);
+		glm::vec3 color(0.5f, 0.0f, 0.0f);
+		glUniform3f(glGetUniformLocation(_program->getID(), "uniColorDiffuse"), color.x, color.y, color.z);
+		glUniform3f(glGetUniformLocation(_program->getID(), "uniColorSpecular"), 1.0f, 1.0f, 1.0f);
+	}
+
 	glm::mat4 model; 
 	model = glm::translate(model, _position);
 	GLuint modelLoc = glGetUniformLocation(_program->getID(), "model");
@@ -47,7 +54,7 @@ void Cell::draw(){
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
 
-	if (_focused) {
+	if (_focused || _reachable) {
 		glUniform1i(glGetUniformLocation(_program->getID(), "uniColored"), false);
 	}
 }
@@ -90,6 +97,11 @@ bool Cell::holdsUnit()
 void Cell::setFocused(bool isFocused)
 {
 	_focused = isFocused;
+}
+
+void Cell::setReachable(bool isReachable)
+{
+	_reachable = isReachable;
 }
 
 int Cell::getX()

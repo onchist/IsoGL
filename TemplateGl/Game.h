@@ -19,6 +19,7 @@
 #include "Character.h"
 #include "Cell.h"
 #include <stdlib.h>
+#include <queue>
 
 enum GameState{FREE, SELECTED, TARGETING, EXIT};
 
@@ -36,10 +37,15 @@ public:
 	static float _deltaTime;
 
 private:
+	int _turns;
 	Team _playerTeam;
 	void draw();
 
 	void update();
+
+	void genReachMap(Cell* start, int reach);
+	void clearReachMap();
+	Cell* getCell(int x, int y);
 
 	void loadBoard();
 	void initSystems();
@@ -48,6 +54,11 @@ private:
 	void pollEvents();
 	void genVaos();
 	void drawInfoTab();
+	void nextTurn();
+
+	std::vector<Cell*> getNeighbors(Cell* cell);
+	void highlightCells();
+	void clearCells();
 		
 	SDL_Window* _window;
 	int _screenWidth;
@@ -69,10 +80,12 @@ private:
 	Character* _selectedCharacter;
 	std::map<int,bool> _inputArray;
 	std::map<int, bool> _firstInput;
+
+	std::map<Cell*, bool> _reachMap;
 	
 	isoCamera _isoCamera;
 
-	std::vector<Entity*> _entities;
+	std::vector<Character*> _entities;
 	std::vector<Cell*> _board;
 	int _boardX;
 	int _boardY;
@@ -81,6 +94,9 @@ private:
 	int _focusY;
 
 	int _keyPressed;
+
+	int* _nTypes;
+	int* _nTypesLeft;
 
 	float _fps;
 
