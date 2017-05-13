@@ -147,6 +147,11 @@ void Game::gameLoop() {
 	}
 }
 
+void Game::removeCharacter(Character * character)
+{
+	character->getCellOn()->unlinkCharacter();
+}
+
 void Game::draw() {
 	glClearDepth(1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -203,10 +208,9 @@ void Game::draw() {
 }
 
 void Game::update() {
-	Game::_time = SDL_GetTicks();
-	Game::_deltaTime = (_time - _lastFrame) / 1000;
-	Game::_lastFrame = _time;
-	_fps = 1.0f / _deltaTime;
+	updateTime();
+	updateFps();
+	
 
 	if (_inputArray[SDLK_ESCAPE]) {
 		_gameState = GameState::EXIT;
@@ -241,51 +245,71 @@ void Game::update() {
 				_focusX--;
 			}
 		}
+
+		_selectedCell = _board[_focusX + _focusY * _boardX];
+
 		if (_gameState == FREE) {
 			if (_firstInput[SDLK_e]) {
 				_firstInput[SDLK_e] = false;
 				
-				if (_board[_focusX + _focusY * _boardX]->holdsUnit()) {
-					Character* character = _board[_focusX + _focusY * _boardX]->getCharacterPtr();
+				if (_selectedCell->holdsUnit()) {
+					Character* character = _selectedCell->getCharacterPtr();
 					if (character->getTeam() == _playerTeam && !character->isUsed()) {
-						_gameState = SELECTED;
-						_selectedCharacter = character;
-						_selectedCharacter->setSelected(true);
-						genReachMap(_board[_focusX + _focusY * _boardX], character->getReach());
-						highlightCells();
+						selectCharacter(character);
 					}
 				}
 			}
 		}
-		_board[_focusX + _focusY * _boardX]->setFocused(true);
-		_isoCamera.setTarget(_board[_focusX + _focusY * _boardX]->getTopPos());
+		_selectedCell->setFocused(true);
+		_isoCamera.setTarget(_selectedCell->getTopPos());
 	
 
 		if (_gameState == SELECTED) {
 			if (_firstInput[SDLK_BACKSPACE]) {
 				_firstInput[SDLK_BACKSPACE] = false;
-				_gameState = FREE;
-				_selectedCharacter->setSelected(false);
-				_selectedCharacter = nullptr;
-				clearCells();
+				unselectCharacter();
 			}
 			if (_firstInput[SDLK_e]) {
-				std::cout << "tried" << std::endl;
 				_firstInput[SDLK_e] = false;
-				if (!_board[_focusX + _focusY * _boardX]->holdsUnit()) {
-					if (_reachMap[_board[_focusX + _focusY * _boardX]]) {
-						_selectedCharacter->setCellOn(_board[_focusX + _focusY * _boardX]);
-						_selectedCharacter->setSelected(false);
-						_selectedCharacter->setUsed(true);
-						_nTypesLeft[_playerTeam]--;
-						_selectedCharacter = nullptr;
-						_gameState = FREE;
-						clearCells();
+				if (!_selectedCell->holdsUnit()) {
+					if (_reachMap[_selectedCell]) {
+						_selectedCharacter->setCellOn(_selectedCell);
+		
+						_gameState = TARGETING;
 						clearReachMap();
+						clearCells();
+						genReachMap(_selectedCharacter->getCellOn(), _selectedCharacter->getAtkReach());
+						highlightCells();
 					}
 				}
 			}
 		}
+
+		if (_gameState == TARGETING) {
+			if (_firstInput[SDLK_BACKSPACE]) {
+				_firstInput[SDLK_BACKSPACE] = false;
+				_selectedCharacter->setUsed(true);
+				_nTypesLeft[_playerTeam]--;
+				unselectCharacter();
+			}
+
+			if (_firstInput[SDLK_e]) {
+				_firstInput[SDLK_e] = false;
+				if (_reachMap[_selectedCell] &&_selectedCell->holdsUnit()) {
+					if (_selectedCell->getCharacterPtr()->getTeam() != _selectedCharacter->getTeam()) {
+						_selectedCharacter->attack(_selectedCell->getCharacterPtr());
+						if (!_selectedCell->getCharacterPtr()->isAlive()) {
+							removeCharacter(_selectedCell->getCharacterPtr());
+						}
+						_selectedCharacter->setUsed(true);
+						_nTypesLeft[_playerTeam]--;
+						unselectCharacter();
+					}
+				}
+			}
+			
+		}
+
 		if (_nTypesLeft[_playerTeam] == 0) {
 			nextTurn();
 		}
@@ -521,6 +545,7 @@ void Game::drawInfoTab() {
 			std::cout << "RED" << std::endl;
 			break;
 		}
+		std::cout << "Unit hp : " << character->getHp() << "/" << character->getMaxHp() << std::endl;
 	}
 
 	std::cout << "InfoTab Ends" << std::endl;
@@ -604,4 +629,30 @@ void Game::genReachMap(Cell* start, int reach) {
 		frontier = newFrontier;
 	}
 	_reachMap = visited;
+}
+
+void Game::updateTime() {
+	Game::_time = SDL_GetTicks();
+	Game::_deltaTime = (_time - _lastFrame) / 1000;
+	Game::_lastFrame = _time;
+}
+
+void Game::updateFps() {
+	_fps = 1.0f / _deltaTime;
+}
+
+void Game::selectCharacter(Character* character) {
+	_gameState = SELECTED;
+	_selectedCharacter = character;
+	_selectedCharacter->setSelected(true);
+	genReachMap(_board[_focusX + _focusY * _boardX], character->getReach());
+	highlightCells();
+}
+
+void Game::unselectCharacter() {
+	_gameState = FREE;
+	_selectedCharacter->setSelected(false);
+	_selectedCharacter = nullptr;
+	clearReachMap();
+	clearCells();
 }

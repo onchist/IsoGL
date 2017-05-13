@@ -30,15 +30,27 @@ public:
 	bool isUsed();
 	void setUsed(bool used);
 	int getReach();
+	int getAtkReach();
+	Cell* getCellOn();
+	void takeDamage(int damage);
+	void attack(Character* character);
+	int getHp();
+	int getMaxHp();
+	bool isAlive();
 protected:
+	bool _alive;
 	void update();
 	Team _team;
 	Cell* _cellOn;
 	std::string _name;
+	int _hp;
+	int _maxHp;
+	int _atk;
 	bool _selected;
 	bool _used;
 
 	int _reach;
+	int _atkReach;
 
 	Model* _model;
 	glm::vec3 _scale;

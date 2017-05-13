@@ -34,7 +34,7 @@ glm::mat4 isoCamera::getViewMatrix() {
 	glm::mat4 tm0, tm1, rm0, rm1, ret;
 	tm0 = glm::translate(tm0, -_target);
 	rm0 = glm::rotate(rm0, glm::radians(-45.0f) + _angle, glm::vec3(0.0f, 0.0f, 1.0f));
-	tm1 = glm::translate(tm1, glm::vec3(0.0f, 5.0f, -5.0f));
+	tm1 = glm::translate(tm1, glm::vec3(0.0f, 10.0f, -10.0f));
 	rm1 = glm::rotate(rm1, glm::radians(-45.0f), glm::vec3(1.0f, 0.0f, 0.0f ));
 	ret = rm1 * tm1 * rm0 * tm0;
 

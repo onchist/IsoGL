@@ -4,6 +4,7 @@
 
 Character::Character(Shader * program, Model* model, Cell* cellOn) : Entity(program), _model(model)
 {
+	_alive = true;
 	_program = program;
 	_model = model;
 	_position = glm::vec3(0.0f);
@@ -17,6 +18,10 @@ Character::Character(Shader * program, Model* model, Cell* cellOn) : Entity(prog
 	_team = BLUE;
 	_used = false;
 	_reach = 3;
+	_hp = 10;
+	_maxHp = _hp;
+	_atk = 5;
+	_atkReach = 1;
 }
 
 
@@ -136,4 +141,41 @@ void Character::setUsed(bool used)
 int Character::getReach()
 {
 	return _reach;
+}
+
+int Character::getAtkReach()
+{
+	return _atkReach;
+}
+
+Cell * Character::getCellOn()
+{
+	return _cellOn;
+}
+
+void Character::takeDamage(int damage)
+{
+	_hp -= damage;
+	if (_hp < 0) { _hp = 0; }
+	if (_hp == 0) { _alive = false; }
+}
+
+void Character::attack(Character * character)
+{
+	character->takeDamage(_atk);
+}
+
+int Character::getHp()
+{
+	return _hp;
+}
+
+int Character::getMaxHp()
+{
+	return _maxHp;
+}
+
+bool Character::isAlive()
+{
+	return _alive;
 }

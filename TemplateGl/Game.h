@@ -37,6 +37,7 @@ public:
 	static float _deltaTime;
 
 private:
+	void removeCharacter(Character* character);
 	int _turns;
 	Team _playerTeam;
 	void draw();
@@ -55,6 +56,10 @@ private:
 	void genVaos();
 	void drawInfoTab();
 	void nextTurn();
+	void updateTime();
+	void updateFps();
+	void selectCharacter(Character* character);
+	void unselectCharacter();
 
 	std::vector<Cell*> getNeighbors(Cell* cell);
 	void highlightCells();
@@ -78,6 +83,7 @@ private:
 	GLuint _diffuseMap;
 	GLuint _specularMap;
 	Character* _selectedCharacter;
+	Cell* _selectedCell;
 	std::map<int,bool> _inputArray;
 	std::map<int, bool> _firstInput;
 
