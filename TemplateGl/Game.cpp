@@ -48,57 +48,59 @@ void Game::initSystems() {
 	}
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 	//création du contexte openGl avec notre fenetre et error checking
-_glContext = SDL_GL_CreateContext(_window);
-if (_glContext == nullptr) {
-	//insert error handling
-}
-//pour faire fonctionner opengl > 3
-glewExperimental = true;
+	_glContext = SDL_GL_CreateContext(_window);
+	if (_glContext == nullptr) {
+		//insert error handling
+	}
+	//pour faire fonctionner opengl > 3
+	glewExperimental = true;
 
-//initialisation de glew et error checking
-if (glewInit() != GLEW_OK) {
-	//insert error handling
-}
+	//initialisation de glew et error checking
+	if (glewInit() != GLEW_OK) {
+		//insert error handling
+	}
 
-SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
-//mise en place du double buffering
-SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, true);
-glEnable(GL_DEPTH_TEST);
-glEnable(GL_BLEND);
-glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//mise en place du double buffering
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, true);
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-SDL_GL_SetSwapInterval(1);
-//couleur de fond d'écran au glClear()
-glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	SDL_GL_SetSwapInterval(1);
+	//couleur de fond d'écran au glClear()
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-//Playground starts
+	//Playground starts
 
-genVaos();
+	genVaos();
 
-int n = 2;
-GLenum* types = new GLenum[2]{ GL_VERTEX_SHADER,GL_FRAGMENT_SHADER };
-std::string** paths = new std::string*[n];
-paths[0] = new std::string[1]{ "shaders/vertex.glsl" };
-paths[1] = new std::string[1]{ "shaders/fragment.glsl" };
-int* nFiles = new int[2]{ 1, 1 };
+	int n = 2;
+	GLenum* types = new GLenum[2]{ GL_VERTEX_SHADER,GL_FRAGMENT_SHADER };
+	std::string** paths = new std::string*[n];
+	paths[0] = new std::string[1]{ "shaders/vertex.glsl" };
+	paths[1] = new std::string[1]{ "shaders/fragment.glsl" };
+	int* nFiles = new int[2]{ 1, 1 };
 
-_program = new Shader(n, types, paths, nFiles);
+	_program = new Shader(n, types, paths, nFiles);
 
-int nL = 2;
-GLenum* typesL = new GLenum[2]{ GL_VERTEX_SHADER,GL_FRAGMENT_SHADER };
-std::string** pathsL = new std::string*[nL];
-pathsL[0] = new std::string[1]{ "shaders/lightVertex.glsl" };
-pathsL[1] = new std::string[1]{ "shaders/lightFragment.glsl" };
-int* nFilesL = new int[2]{ 1, 1 };
+	int nL = 2;
+	GLenum* typesL = new GLenum[2]{ GL_VERTEX_SHADER,GL_FRAGMENT_SHADER };
+	std::string** pathsL = new std::string*[nL];
+	pathsL[0] = new std::string[1]{ "shaders/lightVertex.glsl" };
+	pathsL[1] = new std::string[1]{ "shaders/lightFragment.glsl" };
+	int* nFilesL = new int[2]{ 1, 1 };
 
-_lightProgram = new Shader(nL, typesL, pathsL, nFilesL);
+	_lightProgram = new Shader(nL, typesL, pathsL, nFilesL);
 
-_diffuseMap = utilities::TextureFromFile("textures/diffuse.png");
+	_diffuseMap = utilities::TextureFromFile("textures/diffuse.png");
 
-_specularMap = utilities::TextureFromFile("textures/specular.png");
+	_specularMap = utilities::TextureFromFile("textures/specular.png");
 
-loadBoard();
+	textRenderer.init("fonts/impact/impact.ttf");
+
+	loadBoard();
 }
 
 void Game::freeSystems()
@@ -150,6 +152,7 @@ void Game::gameLoop() {
 void Game::removeCharacter(Character * character)
 {
 	character->getCellOn()->unlinkCharacter();
+	_nTypes[character->getTeam()]--;
 }
 
 void Game::draw() {
@@ -195,7 +198,9 @@ void Game::draw() {
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
 	for (int i = 0; i < _entities.size(); i++) {
-		_entities[i]->draw();
+		if (_entities[i]->isAlive()) {
+			_entities[i]->draw();
+		}
 	}
 
 	for (int i = 0; i < _board.size(); i++) {
@@ -216,9 +221,6 @@ void Game::update() {
 		_gameState = GameState::EXIT;
 	}
 
-	if (_inputArray[SDLK_a]) {
-		_isoCamera.rotate(_deltaTime * 3.14f);
-	}
 	
 	_board[_focusX + _focusY * _boardX]->setFocused(false);
 		if (_firstInput[SDLK_z]) {
@@ -271,14 +273,14 @@ void Game::update() {
 			}
 			if (_firstInput[SDLK_e]) {
 				_firstInput[SDLK_e] = false;
-				if (!_selectedCell->holdsUnit()) {
+				if (!_selectedCell->holdsUnit() || _selectedCell == _selectedCharacter->getCellOn()) {
 					if (_reachMap[_selectedCell]) {
 						_selectedCharacter->setCellOn(_selectedCell);
 		
 						_gameState = TARGETING;
 						clearReachMap();
 						clearCells();
-						genReachMap(_selectedCharacter->getCellOn(), _selectedCharacter->getAtkReach());
+						genReachMap(_selectedCharacter->getCellOn(), _selectedCharacter->getAtkReach(), true);
 						highlightCells();
 					}
 				}
@@ -332,40 +334,64 @@ Cell * Game::getCell(int x, int y)
 }
 
 void Game::loadBoard() {
+	_boardX = 5;
+	_boardY = 5;
+
+	int hardCodedBoard[] = { 
+		1, 1, 1, 1, 1,
+		1, 0, 1, 1, 1,
+		1, 1 ,1, 1, 1,
+		1, 1, 1, 0, 1,
+		1, 1, 1, 1, 0 
+	};
+
 	glm::vec3 light = glm::vec3(1.0f, 1.0f, 1.0f);
 	LightMaterial material;
 	material.ambient = light * 0.2f;
 	material.diffuse = light * 0.7f;
 	material.specular = light * 1.0f;
 
-	glm::vec3 position = glm::vec3(-3.0f, -3.0f, 5.0f);
+	glm::vec3 position = glm::vec3(_boardX * Cell::unity/2, _boardY * Cell::unity/2, 10.0f);
 
 	float constant = 1.0f;
-	float linear = 0.045f;
-	float quadratic = 0.0075f;
+	float linear = 0.014f;
+	float quadratic = 0.0007f;
 
 	PointLight* pointLight = new PointLight(material, position, constant, linear, quadratic);
 
 	_lights.push_back(pointLight);
 
 	
-
-	_boardX = 7;
-	_boardY = 7;
+	
+	
 
 	for (int y = 0; y < _boardY; y++) {
 		for (int x = 0; x < _boardX; x++) {
-			_board.push_back(new Cell(_program, _diffuseMap, _specularMap, x, y));
+			switch (hardCodedBoard[x + y * _boardX]) {
+			case 0:
+				_board.push_back(new Cell(_program, _specularMap, _specularMap, x, y, false));
+				break;
+			case 1:
+				_board.push_back(new Cell(_program, _diffuseMap, _specularMap, x, y));
+				break;
+			}
 		}
 	}
 
 	
 
 	Model* ourModel = new Model("models/MaleLow/MaleLow.obj");
-	_entities.push_back(new Character(_program, ourModel, _board[1 + _boardY * 1]));
-	_entities.push_back(new Character(_program, ourModel, _board[2 + _boardY * 2]));
-	_entities.push_back(new Character(_program, ourModel, _board[2 + _boardY * 1]));
-	_board[2 + _boardY * 2]->getCharacterPtr()->setTeam(RED);
+	CharacterStats peonBleu = { "peon", 4, 10, 3, 1, BLUE };
+	CharacterStats archerBleu = { "archer", 3, 7, 3, 2, BLUE };
+
+	CharacterStats peonRouge = { "peon", 4, 10, 3, 1, RED };
+	CharacterStats archerRouge = { "archer", 3, 7, 3, 2, RED };
+
+	_entities.push_back(new Character(_program, ourModel, _board[0 + _boardY * 0], peonBleu));
+	_entities.push_back(new Character(_program, ourModel, _board[1 + _boardY * 1], archerBleu));
+
+	_entities.push_back(new Character(_program, ourModel, _board[1 + _boardY * 3], peonRouge));
+	_entities.push_back(new Character(_program, ourModel, _board[2 + _boardY * 2], archerRouge));
 
 	_nTypes = new int[N_TEAM];
 	_nTypesLeft = new int[N_TEAM];
@@ -518,6 +544,7 @@ glBindBuffer(GL_ARRAY_BUFFER, 0);
 void Game::drawInfoTab() {
 	system("cls");
 	std::cout << "InfoTab Begin : " << std::endl;
+	std::cout << "fps : " << _fps << std::endl;
 	std::cout << "Turn : " << _turns << std::endl;
 	std::string playerTeamStr;
 
@@ -557,13 +584,14 @@ void Game::nextTurn()
 	for (int i = 0; i < _entities.size(); i++) {
 		_entities[i]->setUsed(false);
 	}
-	_nTypesLeft[_playerTeam] = _nTypes[_playerTeam];
+	
 	if (_playerTeam == RED) {
 		_playerTeam = BLUE;
 	}
 	else if (_playerTeam == BLUE) {
 		_playerTeam = RED;
 	}
+	_nTypesLeft[_playerTeam] = _nTypes[_playerTeam];
 
 }
 
@@ -606,7 +634,7 @@ void Game::clearCells()
 }
 
 
-void Game::genReachMap(Cell* start, int reach) {
+void Game::genReachMap(Cell* start, int reach, bool fly) {
 	std::queue<Cell*> frontier;
 	std::queue<Cell*> newFrontier;
 	std::map<Cell*, bool> visited;
@@ -622,8 +650,20 @@ void Game::genReachMap(Cell* start, int reach) {
 		}
 		for (int i = 0; i < neighbors.size(); i++){
 			if (visited[neighbors[i]] == false) {
-				visited[neighbors[i]] = true;
-				newFrontier.push(neighbors[i]);
+				if (fly) {
+					visited[neighbors[i]] = true;
+					newFrontier.push(neighbors[i]);
+				}
+				else if (neighbors[i]->isWalkable()) {
+					if (!neighbors[i]->holdsUnit()) {
+						visited[neighbors[i]] = true;
+						newFrontier.push(neighbors[i]);
+					}
+					else if (neighbors[i]->getCharacterPtr()->getTeam() == _playerTeam) {
+						visited[neighbors[i]] = true;
+						newFrontier.push(neighbors[i]);
+					}
+				}
 			}
 		}
 		frontier = newFrontier;
@@ -645,7 +685,7 @@ void Game::selectCharacter(Character* character) {
 	_gameState = SELECTED;
 	_selectedCharacter = character;
 	_selectedCharacter->setSelected(true);
-	genReachMap(_board[_focusX + _focusY * _boardX], character->getReach());
+	genReachMap(_board[_focusX + _focusY * _boardX], character->getReach(), false);
 	highlightCells();
 }
 
