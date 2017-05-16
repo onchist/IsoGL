@@ -20,7 +20,6 @@
 #include "Cell.h"
 #include <stdlib.h>
 #include <queue>
-#include "TextRenderer.h"
 
 enum GameState{FREE, SELECTED, TARGETING, EXIT};
 
@@ -45,7 +44,7 @@ private:
 
 	void update();
 
-	void genReachMap(Cell* start, int reach, bool fly = true);
+	void genReachMap(Cell* start, int reach);
 	void clearReachMap();
 	Cell* getCell(int x, int y);
 
@@ -61,7 +60,6 @@ private:
 	void updateFps();
 	void selectCharacter(Character* character);
 	void unselectCharacter();
-	TextRenderer textRenderer;
 
 	std::vector<Cell*> getNeighbors(Cell* cell);
 	void highlightCells();

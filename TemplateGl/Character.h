@@ -7,18 +7,9 @@ enum Team{RED, BLUE};
 
 const int N_TEAM = 2;
 
-struct CharacterStats {
-	std::string name;
-	int atk;
-	int hp;
-	int mov;
-	int atkrange;
-	Team team;
-};
-
 class Character : public Entity {
 public:
-	Character(Shader* program, Model* model, Cell* cellOn, CharacterStats stats);
+	Character(Shader* program, Model* model, Cell* cellOn);
 	~Character();
 
 	virtual void draw();
