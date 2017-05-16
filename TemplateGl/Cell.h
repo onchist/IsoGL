@@ -8,7 +8,7 @@ class Character;
 
 class Cell : public Entity {
 public:
-	Cell(Shader* program, GLuint diffuseMap, GLuint specularMap, int x, int y);
+	Cell(Shader* program, GLuint diffuseMap, GLuint specularMap, int x, int y, bool walkable = true);
 	virtual void draw();
 	static GLuint vaoCube;
 	glm::vec3 getTopPos();
@@ -17,16 +17,18 @@ public:
 	Character* getCharacterPtr();
 	glm::vec3 getPosition();
 	bool holdsUnit();
+	bool isWalkable();
 	void setFocused(bool isFocused);
 	void setReachable(bool isReachable);
 	int getX();
 	int getY();
+	static float unity;
 protected:
+	bool _walkable;
 	bool _hasUnitHeld;
 	void update();
 	GLuint _diffuseMap;
 	GLuint _specularMap;
-	static float unity;
 	int _x;
 	int _y;
 	float _height;

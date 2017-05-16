@@ -2,7 +2,7 @@
 
 
 
-Character::Character(Shader * program, Model* model, Cell* cellOn) : Entity(program), _model(model)
+Character::Character(Shader * program, Model* model, Cell* cellOn, CharacterStats stats) : Entity(program)
 {
 	_alive = true;
 	_program = program;
@@ -14,14 +14,14 @@ Character::Character(Shader * program, Model* model, Cell* cellOn) : Entity(prog
 	_rotX = glm::radians(90.0f);
 	_rotY = glm::radians(0.0f);
 	_rotZ = glm::radians(0.0f);
-	_name = "placeholder";
-	_team = BLUE;
+	_name = stats.name;
+	_team = stats.team;
 	_used = false;
-	_reach = 3;
-	_hp = 10;
+	_reach = stats.mov;
+	_hp = stats.hp;
 	_maxHp = _hp;
-	_atk = 5;
-	_atkReach = 1;
+	_atk = stats.atk;
+	_atkReach = stats.atkrange;
 }
 
 
