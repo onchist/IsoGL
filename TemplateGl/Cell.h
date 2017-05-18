@@ -8,7 +8,8 @@ class Character;
 
 class Cell : public Entity {
 public:
-	Cell(Shader* program, GLuint diffuseMap, GLuint specularMap, int x, int y, bool walkable = true);
+	Cell(Shader* program, GLuint diffuseMap, GLuint specularMap, 
+		int x, int y, bool walkable = true);
 	virtual void draw();
 	static GLuint vaoCube;
 	glm::vec3 getTopPos();

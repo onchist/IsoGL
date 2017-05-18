@@ -9,7 +9,7 @@ class isoCamera
 public:
 	isoCamera(glm::vec3 target = glm::vec3(0.0f, 0.0f, 0.0f));
 	~isoCamera();
-	glm::mat4 getViewMatrix();
+	glm::mat4 getViewMatrix(float zoom);
 	void setTarget(glm::vec3 newTarget);
 	void move(glm::vec3 offset);
 

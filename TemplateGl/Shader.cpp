@@ -19,6 +19,7 @@ void Shader::use() {
 }
 
 GLuint Shader::loadShader(GLenum type, const int N, std::string* shaderPaths) {
+
 	bool aborted = false;
 	//initialize the shader
 	GLuint shaderID = glCreateShader(type);

@@ -148,6 +148,8 @@
     <None Include="shaders\fragment.glsl" />
     <None Include="shaders\lightFragment.glsl" />
     <None Include="shaders\lightVertex.glsl" />
+    <None Include="shaders\textFragment.glsl" />
+    <None Include="shaders\textVertex.glsl" />
     <None Include="shaders\vertex.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
