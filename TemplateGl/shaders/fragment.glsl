@@ -56,7 +56,10 @@ vec3 materialSpec;
 
 void main()
 {
-	
+	float renderDistance = length(FragPos);
+	if(renderDistance > 100.0){
+		return;
+	}
 
 	if(uniColored){
 		materialDif = uniColorDiffuse;

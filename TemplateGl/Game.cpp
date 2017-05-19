@@ -49,6 +49,7 @@ void Game::initSystems() {
 		//insert error handling
 	}
 	SDL_SetRelativeMouseMode(SDL_TRUE);
+	//SDL_SetWindowFullscreen(_window, SDL_WINDOW_FULLSCREEN);
 	//création du contexte openGl avec notre fenetre et error checking
 	_glContext = SDL_GL_CreateContext(_window);
 	if (_glContext == nullptr) {
